@@ -1,0 +1,25 @@
+oomp_classification: ''
+oomp_type: ''
+oomp_size: ''
+oomp_color: ''
+oomp_description_main: ''
+oomp_description_extra: ''
+oomp_manufacturer: ''
+oomp_part_number: ''
+oomp_open_hardware_project_website: ''
+oomp_open_hardware_project_repo: ''
+# oomp_open_hardware_project_file_list:
+  # - destination_file: "eagle_board.brd"
+  #   source_file: ""
+  # - destination_file: "eagle_schematic.sch"
+  #   source_file: ""
+  #  - destination_file: "kicad/working.kicad_board"
+  #     source_file: ""
+  #  - destination_file: "license_source.txt"
+  #     source_file: "license.txt"
+  #  - destination_file: "readme_source.md"
+  #     source_file: "readme.md"
+  #  - destination_file: "image_source.jpg"
+  #     source_file: ""
+# oshwa_registration_number: 'us002319'
+# oshwa_registration_link: 'https://certification.oshwa.org/us002319.html'
