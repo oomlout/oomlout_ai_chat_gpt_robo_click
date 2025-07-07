@@ -8,18 +8,13 @@ oomp_manufacturer: ''
 oomp_part_number: ''
 oomp_open_hardware_project_website: ''
 oomp_open_hardware_project_repo: ''
-# oomp_open_hardware_project_file_list:
-  # - destination_file: "eagle_board.brd"
-  #   source_file: ""
-  # - destination_file: "eagle_schematic.sch"
-  #   source_file: ""
-  #  - destination_file: "kicad/working.kicad_board"
-  #     source_file: ""
-  #  - destination_file: "license_source.txt"
-  #     source_file: "license.txt"
-  #  - destination_file: "readme_source.md"
-  #     source_file: "readme.md"
-  #  - destination_file: "image_source.jpg"
-  #     source_file: ""
-# oshwa_registration_number: 'us002319'
-# oshwa_registration_link: 'https://certification.oshwa.org/us002319.html'
+actions:
+  # - command: 'new_chat'
+  # - command: 'query'
+  #   text: 'can i get some pictures of tourist attractions in hx2 halifax uk, please ensure it is definietly in the uk and has the post code hx2?'
+  # - command: 'query'
+  #   text: 'can you tell me how you would describe a chibi style sticker of a tourist attraction and add HX2 to it, as well as the text of the attractions name'
+  # - command: 'query'
+  #   text: 'awesome! make it please'
+  - command: 'save_image'
+    file_name: 'working.png'
