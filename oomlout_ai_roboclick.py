@@ -14,7 +14,7 @@ def main(**kwargs):
         try:
             with open(config_file, 'r') as file:
                 config = yaml.safe_load(file)
-                print(f"Configuration loaded from {config_file}: {config}")
+                print(f"Configuration loaded from {config_file}: {len(config)} items found")
         except FileNotFoundError:
             #try in the current file directory to use the default one
             config_file = os.path.join(os.path.dirname(__file__), "configuration", "oomlout_ai_chat_gpt_robo_click_configuration.yaml")
@@ -69,8 +69,8 @@ def run_single(**kwargs):
         print(f"loading configuration from {file_action}")
         try:
             with open(file_action, 'r') as file:
-                actions = yaml.safe_load(file)
-                print(f"Configuration loaded from {file_action}: {actions}")
+                workings = yaml.safe_load(file)
+                print(f"Configuration loaded from {file_action}: {len(workings)}")
         except FileNotFoundError:
             print(f"Configuration file {file_action} not found.")
             return
@@ -78,25 +78,60 @@ def run_single(**kwargs):
             print(f"Error parsing YAML file {file_action}: {e}")
             return
         
-        actions = actions.get("actions", [])
+        actions = workings.get("actions", [])
         kwargs["actions"] = actions
 
     
 
-    print(f"Running with actions: {actions}")
+    print(f"Running with actions: {len(actions)}")
+
+    file_test = workings.get("file_test", "")
+    if file_test != "":
+        file_test_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_test)
+        if os.path.exists(file_test_absolute):
+            print(f"File test {file_test_absolute} exists, skipping actions.")
+            return
 
     for action in actions:
         kwargs["action"] = action
         command = action.get("command")
-        if command == "new_chat":
+        if command == "add_image":
+            add_image(**kwargs)
+        elif command == "new_chat":
             kwargs
             new_chat(**kwargs)
         elif command == "query":
             query(**kwargs)
-        elif command == "save_image":
-            save_image(**kwargs)
+        elif command == "save_image_generated":
+            save_image_generated(**kwargs)
+        elif command == "save_image_search_result":
+            save_image_search_result(**kwargs)
+    robo.robo_chrome_close_tab(**kwargs)  # Close the tab after all actions are done
 
 #actions
+
+
+def add_image(**kwargs):
+    print("add_image -- adding an image")
+    kwargs["position_click"] = [750,995]
+    position_click = kwargs.get("position_click", [960, 500])
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "working.png")
+    directory_absolute = kwargs.get("directory_absolute", "")
+    file_name_absolute = os.path.join(directory_absolute, file_name)
+    file_name_abs = os.path.abspath(file_name) 
+    print(f"Adding image {file_name} at position {position_click}")
+    
+    #click on the position
+    robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
+    robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
+    robo.robo_keyboard_press_enter(delay=5)
+    robo.robo_keyboard_send(string=file_name_absolute, delay=5)  # Type the file name
+    robo.robo_keyboard_press_enter(delay=5)  # Press enter to confirm
+    robo.robo_delay(delay=15)  # Wait for the image to be added
+    #preess escape 5 times in case of any dialog boxes
+    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
+
 
 def new_chat(**kwargs):
     print("new_chat -- opening up a new chat")
@@ -104,7 +139,7 @@ def new_chat(**kwargs):
     #type in start query
     start_query = "Hiya, chadikins the great I have a task for you can you help?" 
     robo.robo_keyboard_send(string=start_query, delay=5)
-    robo.robo_keyboard_press_enter(delay=10)
+    robo.robo_keyboard_press_enter(delay=20)
 
 def query(**kwargs):
     action = kwargs.get("action", {})
@@ -114,23 +149,58 @@ def query(**kwargs):
     query_text = action.get("text", "")
     robo.robo_keyboard_send(string=query_text, delay=5)
     print(f"Querying with text: {query_text}")
-    robo.robo_keyboard_press_enter(delay=30)
+    robo.robo_keyboard_press_enter(delay=60)
     
-def save_image(**kwargs):
+def save_image_generated(**kwargs):
+    kwargs["position_click"] = [960, 500]  # Default position for clicking the image    
     robo.robo_delay(delay=300)
+    robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the image to focus
+    robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down twice to select the file input
+    save_image(**kwargs)
+
+def save_image_search_result(**kwargs):
+    kwargs["position_click"] = [813, 259]  # Default position for clicking the image
+    position_click = kwargs.get("position_click")
+    
     action = kwargs.get("action", {})
+    index = action.get("index", 1)
+    position_click[0] += (int(index)-1) * 200  # Adjust the x-coordinate based on the index
     file_name = action.get("file_name", "working.png")   
     directory_absolute = kwargs.get("directory_absolute", "")
-    file_name_absolute = os.path.abspath(file_name)
+    file_name_absolute = os.path.join(directory_absolute, file_name)
     file_name_abs = os.path.abspath(file_name) 
     print(f"Saving image as {file_name}")
     #save the image
-    robo.robo_mouse_click(position=[960, 500], delay=2, button="right")  # Click on the image to focus
+    robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
+    robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
     #press down twice
     robo.robo_keyboard_press_down(delay=1, repeat=2)
     robo.robo_keyboard_press_enter(delay=5)
     robo.robo_keyboard_send(string=file_name_absolute, delay=5)
     robo.robo_keyboard_press_enter(delay=5)
+    robo.robo_keyboard_send(string="y", delay=5)
+    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
+
+    print(f"Image saved as {file_name}")
+
+def save_image(**kwargs):
+    position_click = kwargs.get("position_click", [960, 500])
+    
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "working.png")   
+    directory_absolute = kwargs.get("directory_absolute", "")
+    file_name_absolute = os.path.join(directory_absolute, file_name)
+    file_name_abs = os.path.abspath(file_name) 
+    print(f"Saving image as {file_name}")
+    #save the image
+    robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
+    #press down twice
+    robo.robo_keyboard_press_down(delay=1, repeat=2)
+    robo.robo_keyboard_press_enter(delay=5)
+    robo.robo_keyboard_send(string=file_name_absolute, delay=5)
+    robo.robo_keyboard_press_enter(delay=5)
+    robo.robo_keyboard_send(string="y", delay=5)
+    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     print(f"Image saved as {file_name}")
 
 if __name__ == "__main__":

@@ -16,5 +16,8 @@ actions:
   #   text: 'can you tell me how you would describe a chibi style sticker of a tourist attraction and add HX2 to it, as well as the text of the attractions name'
   # - command: 'query'
   #   text: 'awesome! make it please'
-  - command: 'save_image'
+  - command: 'save_image_generation'
     file_name: 'working.png'
+  - command: 'save_image_preview'
+    file_name: 'working.png'
+    index: 1    
