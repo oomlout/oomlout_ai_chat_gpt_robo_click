@@ -1,4 +1,4 @@
-
+import random
 import argparse
 import yaml
 import robo
@@ -58,12 +58,18 @@ def main(**kwargs):
                 print(f"Skipping non-directory: {dir}")
     else:
         print(f"No directory specified, running in current directory: {os.getcwd()}")
+        mode = "oomlout_ai_roboclick"
+        kwargs["mode"] = mode
+        run_single(**kwargs)
+        mode = "oomlout_corel_roboclick"
+        kwargs["mode"] = mode
         run_single(**kwargs)
             
         
 def run_single(**kwargs):
     file_action = kwargs.get("file_action", "configuration\\working.yaml")
     configuration = kwargs.get("configuration", {})
+    mode = kwargs.get("mode", "")
     # Load actions from YAML file
     if True:
         print(f"loading configuration from {file_action}")
@@ -78,8 +84,9 @@ def run_single(**kwargs):
             print(f"Error parsing YAML file {file_action}: {e}")
             return
         
-        actions = workings.get("actions", [])
-        kwargs["actions"] = actions
+        base = workings.get(mode, [])
+        actions = base.get("actions", {})
+        
 
     
 
@@ -92,11 +99,13 @@ def run_single(**kwargs):
             print(f"File test {file_test_absolute} exists, skipping actions.")
             return
 
+    result = ""
     for action in actions:
         kwargs["action"] = action
         command = action.get("command")
+        
         if command == "add_image":
-            add_image(**kwargs)
+            result = add_image(**kwargs)
         elif command == "new_chat":
             kwargs
             new_chat(**kwargs)
@@ -106,12 +115,20 @@ def run_single(**kwargs):
             save_image_generated(**kwargs)
         elif command == "save_image_search_result":
             save_image_search_result(**kwargs)
-    robo.robo_chrome_close_tab(**kwargs)  # Close the tab after all actions are done
+        elif command == "wait_for_file":
+            result = wait_for_file(**kwargs)
+        #if result is "exit", break the loop
+        if result == "exit" or result == "exit_no_tab":
+            print("Exiting due to 'exit' command.")
+            break   
+    if result != "exit_no_tab":
+        robo.robo_chrome_close_tab(**kwargs)  # Close the tab after all actions are done
 
 #actions
 
 
 def add_image(**kwargs):
+    return_value = ""
     print("add_image -- adding an image")
     kwargs["position_click"] = [750,995]
     position_click = kwargs.get("position_click", [960, 500])
@@ -121,7 +138,11 @@ def add_image(**kwargs):
     file_name_absolute = os.path.join(directory_absolute, file_name)
     file_name_abs = os.path.abspath(file_name) 
     print(f"Adding image {file_name} at position {position_click}")
-    
+    #test if filename exists
+    if not os.path.exists(file_name_absolute):
+        print(f"File {file_name_absolute} does not exist, skipping action.")
+        return_value = "exit"
+        return return_value
     #click on the position
     robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
     robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
@@ -131,6 +152,7 @@ def add_image(**kwargs):
     robo.robo_delay(delay=15)  # Wait for the image to be added
     #preess escape 5 times in case of any dialog boxes
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
+    return return_value
 
 
 def new_chat(**kwargs):
@@ -154,6 +176,9 @@ def query(**kwargs):
 def save_image_generated(**kwargs):
     kwargs["position_click"] = [960, 500]  # Default position for clicking the image    
     robo.robo_delay(delay=300)
+    #random extra between 300 and 900 seconds
+    delay = random.randint(300, 900)
+    robo.robo_delay(delay=delay)  # Wait for the image to be generated
     robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the image to focus
     robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down twice to select the file input
     save_image(**kwargs)
@@ -202,6 +227,24 @@ def save_image(**kwargs):
     robo.robo_keyboard_send(string="y", delay=5)
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     print(f"Image saved as {file_name}")
+
+def wait_for_file(**kwargs):
+    print("wait_for_file -- skip if a necessary file doesnt exist")
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "working.png")
+    directory_absolute = kwargs.get("directory_absolute", "")
+    file_name_absolute = os.path.join(directory_absolute, file_name)
+    file_name_abs = os.path.abspath(file_name) 
+    
+    
+    return_value = ""
+
+    # Wait for the file to be created
+    if not os.path.exists(file_name_absolute):
+        # If the file does not exist, wait and check again
+        return_value = "exit_no_tab"        
+        print(f"File {file_name_absolute} not found.")
+    return return_value
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='My CLI tool')
