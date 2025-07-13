@@ -7,7 +7,12 @@ import sys
 import os
 
 def main(**kwargs):
-    
+    mode = kwargs.get("mode", "")
+    #if mode isnt a list make it one
+    if not isinstance(mode, list):
+        mode = [mode]
+        kwargs["mode"] = mode
+    mode_local = copy.deepcopy(mode)
     #load confuiguration
     if True:
         config_file = "configuration\\oomlout_ai_chat_gpt_robo_click_configuration.yaml"
@@ -53,12 +58,15 @@ def main(**kwargs):
                 file_action = os.path.join(dir, "working.yaml")
                 print(f"running file_action: {file_action}")
                 kwargs["file_action"] = file_action
-                mode = "oomlout_ai_roboclick"
-                kwargs["mode"] = mode
-                run_single(**kwargs)
-                mode = "oomlout_corel_roboclick"
-                kwargs["mode"] = mode
-                run_single(**kwargs)
+                if "oomlout_ai_roboclick" in mode_local:                    
+                    mode = "oomlout_ai_roboclick"
+                    kwargs["mode"] = mode
+                    run_single(**kwargs)
+                if "oomlout_corel_roboclick" in mode_local:
+                    mode = "oomlout_corel_roboclick"
+                    kwargs["mode"] = mode
+                    run_single(**kwargs)
+                
             else:
                 print(f"Skipping non-directory: {dir}")
     else:
@@ -100,12 +108,18 @@ def run_single(**kwargs):
 
     print(f"Running with actions: {len(actions)}")
 
-    file_test = workings.get("file_test", "")
+    file_test = base.get("file_test", "")
+    file_test_mode = base.get("file_test_mode", "exists")
     if file_test != "":
         file_test_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_test)
-        if os.path.exists(file_test_absolute):
-            print(f"File test {file_test_absolute} exists, skipping actions.")
-            return
+        if file_test_mode == "exists":
+            if os.path.exists(file_test_absolute):
+                print(f"File test {file_test_absolute} exists, skipping actions.")
+                return
+        else:
+            if not os.path.exists(file_test_absolute):
+                print(f"File test {file_test_absolute} does not exist, skipping actions.")
+                return
 
     result = ""
     for action in actions:
@@ -114,6 +128,38 @@ def run_single(**kwargs):
         
         if command == "add_image":
             result = add_image(**kwargs)
+        elif command == "close_tab":
+            result = close_tab(**kwargs)
+        #corel commands
+        #corel_close
+        elif command == "corel_close_file":
+            corel_close_file(**kwargs)        
+        elif command == "corel_import":
+            corel_import(**kwargs)
+        elif command == "corel_open":        
+            corel_open(**kwargs)
+        elif command == "corel_save":
+            corel_save(**kwargs)
+        elif command == "corel_save_as":
+            corel_save_as(**kwargs)        
+        elif command == "corel_export":
+            corel_export(**kwargs)
+        elif command == "corel_paste":
+            corel_paste(**kwargs)
+        elif command == "corel_select_all":
+            robo.robo_corel_select_all(**kwargs)
+        #corel_set_position
+        elif command == "corel_set_size":
+            corel_set_size(**kwargs)
+        elif command == "corel_set_position":
+            corel_set_position(**kwargs)
+        elif command == "corel_copy":
+            corel_copy(**kwargs)
+        elif command == "corel_paste":
+            robo.robo_corel_paste(**kwargs)
+        #corel trace clipart
+        elif command == "corel_trace_clipart":
+            corel_trace_clipart(**kwargs)
         ###### file commands
         elif command == "file_copy":
             result = file_copy(**kwargs)
@@ -132,9 +178,7 @@ def run_single(**kwargs):
         if result == "exit" or result == "exit_no_tab":
             print("Exiting due to 'exit' command.")
             break   
-    if result != "exit_no_tab":
-        robo.robo_chrome_close_tab(**kwargs)  # Close the tab after all actions are done
-
+    
 #actions
 
 
@@ -165,13 +209,143 @@ def add_image(**kwargs):
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     return return_value
 
+def close_tab(**kwargs):
+    print("close_tab -- closing the current tab")
+    #close the current tab
+    robo.robo_chrome_close_tab(**kwargs)
+    #wait for 5 seconds
+    robo.robo_delay(delay=5)  # Wait for the tab to close
+
 ##### corel commands
+def corel_copy(**kwargs):
+    print("corel_copy -- copying selected items in corel")
+    #copy selected items in corel
+    robo.robo_corel_copy(**kwargs)
+
+
+def corel_close_file(**kwargs):
+    print("corel_close_file -- closing corel")
+    #close corel
+    robo.robo_corel_close_file(**kwargs)
+
+def corel_export(**kwargs):
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "")
+    file_type = action.get("file_type", "pdf")
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
+    kwargs2["file_type"] = file_type
+    robo.robo_corel_export_file(**kwargs2)
+
+def corel_import(**kwargs):
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "")
+    x = action.get("x", "")
+    y = action.get("y", "")
+    width = action.get("width", "")
+    height = action.get("height", "")
+    max_dimension = action.get("max_dimension", "")
+
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
+    if x != "":
+        kwargs2["x"] = x
+    if y != "":
+        kwargs2["y"] = y
+    if width != "":
+        kwargs2["width"] = width
+    if height != "":
+        kwargs2["height"] = height
+    if max_dimension != "":
+        kwargs2["max_dimension"] = max_dimension
+
+    robo.robo_corel_import_file(**kwargs2)
+
+def corel_open(**kwargs):
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "")
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
+    robo.robo_corel_open(**kwargs2)
+
+def corel_paste(**kwargs):
+    print("corel_paste -- pasting copied items in corel")
+    #paste copied items in corel
+    action = kwargs.get("action", {})
+    x = action.get("x", "")
+    y = action.get("y", "")
+    width = action.get("width", "")
+    height = action.get("height", "")
+
+    kwargs2 = copy.deepcopy(kwargs)
+    if x != "":
+        kwargs2["x"] = x
+    if y != "":
+        kwargs2["y"] = y
+    if width != "":
+        kwargs2["width"] = width
+    if height != "":
+        kwargs2["height"] = height
+    robo.robo_corel_paste(**kwargs2)
+
+def corel_save(**kwargs):
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "")
+    
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
+    robo.robo_corel_save(**kwargs2)
+
+def corel_save_as(**kwargs):
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "")
+    
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
+    robo.robo_corel_save_as(**kwargs2)
+
+def corel_set_position(**kwargs):
+    print("corel_set_position -- setting position")
+    action = kwargs.get("action", {})
+    x = action.get("x", "")
+    y = action.get("y", "")
+    
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["x"] = x
+    kwargs2["y"] = y
+    robo.robo_corel_set_position(**kwargs2)
+
+def corel_set_size(**kwargs):
+    print("corel_set_size -- setting size")
+    action = kwargs.get("action", {})
+    width = action.get("width", "")
+    height = action.get("height", "")
+    max_dimension = action.get("max_dimension", "")
+    
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["width"] = width
+    kwargs2["height"] = height
+    if max_dimension != "":
+        kwargs2["max_dimension"] = max_dimension
+    robo.robo_corel_set_size(**kwargs2)
+
+def corel_trace_clipart(**kwargs):
+    print("corel_trace_clipart -- tracing clipart")
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "")
+    
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
+    robo.robo_corel_trace_clipart(**kwargs2)
 
 ##### file commands
 def file_copy(**kwargs):
     import shutil
-    file_source = kwargs.get("file_source", "")
-    file_destination = kwargs.get("file_destination", "")
+    action = kwargs.get("action", {})
+    file_source = action.get("file_source", "")
+    file_destination = action.get("file_destination", "")
+    directory = kwargs.get("directory", "")
+    file_destination = os.path.join(directory, file_destination)
     
     return_value = ""
 
