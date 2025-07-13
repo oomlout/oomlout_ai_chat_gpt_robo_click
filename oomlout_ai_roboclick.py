@@ -53,9 +53,9 @@ def main(**kwargs):
                 file_action = os.path.join(dir, "working.yaml")
                 print(f"running file_action: {file_action}")
                 kwargs["file_action"] = file_action
-                #mode = "oomlout_ai_roboclick"
-                #kwargs["mode"] = mode
-                #run_single(**kwargs)
+                mode = "oomlout_ai_roboclick"
+                kwargs["mode"] = mode
+                run_single(**kwargs)
                 mode = "oomlout_corel_roboclick"
                 kwargs["mode"] = mode
                 run_single(**kwargs)
@@ -63,9 +63,9 @@ def main(**kwargs):
                 print(f"Skipping non-directory: {dir}")
     else:
         print(f"No directory specified, running in current directory: {os.getcwd()}")
-        #mode = "oomlout_ai_roboclick"
-        #kwargs["mode"] = mode
-        #run_single(**kwargs)
+        mode = "oomlout_ai_roboclick"
+        kwargs["mode"] = mode
+        run_single(**kwargs)
         mode = "oomlout_corel_roboclick"
         kwargs["mode"] = mode
         run_single(**kwargs)
