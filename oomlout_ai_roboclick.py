@@ -58,9 +58,9 @@ def main(**kwargs):
                 print(f"Skipping non-directory: {dir}")
     else:
         print(f"No directory specified, running in current directory: {os.getcwd()}")
-        mode = "oomlout_ai_roboclick"
-        kwargs["mode"] = mode
-        run_single(**kwargs)
+        #mode = "oomlout_ai_roboclick"
+        #kwargs["mode"] = mode
+        #run_single(**kwargs)
         mode = "oomlout_corel_roboclick"
         kwargs["mode"] = mode
         run_single(**kwargs)
@@ -85,8 +85,11 @@ def run_single(**kwargs):
             return
         
         base = workings.get(mode, [])
-        actions = base.get("actions", {})
-        
+        if base != []:
+            actions = base.get("actions", {})
+        else:
+            print(f"No actions found for mode {mode} in {file_action}")
+            return
 
     
 
@@ -106,6 +109,9 @@ def run_single(**kwargs):
         
         if command == "add_image":
             result = add_image(**kwargs)
+        ###### file commands
+        elif command == "file_copy":
+            result = file_copy(**kwargs)
         elif command == "new_chat":
             kwargs
             new_chat(**kwargs)
@@ -154,6 +160,31 @@ def add_image(**kwargs):
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     return return_value
 
+##### corel commands
+
+##### file commands
+def file_copy(**kwargs):
+    import shutil
+    file_source = kwargs.get("file_source", "")
+    file_destination = kwargs.get("file_destination", "")
+    
+    return_value = ""
+
+    if file_source == "" or file_destination == "":
+        print("file_source or file_destination not set, skipping file copy")
+        return
+    
+    #check if the file exists
+    if os.path.isfile(file_source):
+        print(f"copying {file_source} to {file_destination}")
+        #use shutil to copy the file
+        import shutil
+        shutil.copy(file_source, file_destination)
+    else:
+        print(f"file {file_source} does not exist")
+        return_value = "exit_no_tab"
+
+    return return_value
 
 def new_chat(**kwargs):
     print("new_chat -- opening up a new chat")
