@@ -8,6 +8,7 @@ import os
 
 def main(**kwargs):
     mode = kwargs.get("mode", "")
+    filt = kwargs.get("filter", "")
     #if mode isnt a list make it one
     if not isinstance(mode, list):
         mode = [mode]
@@ -49,26 +50,31 @@ def main(**kwargs):
         pass
         import glob
         directories = glob.glob(os.path.join(directory, "*"))
-        for dir in directories:         
-            kwargs["directory"] = dir   
-            directory_absolute = os.path.abspath(dir)
-            kwargs["directory_absolute"] = directory_absolute
+        for dir in directories:   
+            if filt == "" or filt in dir:
+                kwargs["directory"] = dir   
+                directory_absolute = os.path.abspath(dir)
+                kwargs["directory_absolute"] = directory_absolute
 
-            if os.path.isdir(dir):
-                file_action = os.path.join(dir, "working.yaml")
-                print(f"running file_action: {file_action}")
-                kwargs["file_action"] = file_action
-                if "oomlout_ai_roboclick" in mode_local:                    
-                    mode = "oomlout_ai_roboclick"
-                    kwargs["mode"] = mode
-                    run_single(**kwargs)
-                if "oomlout_corel_roboclick" in mode_local:
-                    mode = "oomlout_corel_roboclick"
-                    kwargs["mode"] = mode
-                    run_single(**kwargs)
-                
-            else:
-                print(f"Skipping non-directory: {dir}")
+                if os.path.isdir(dir):
+                    file_action = os.path.join(dir, "working.yaml")
+                    print(f"running file_action: {file_action}")
+                    kwargs["file_action"] = file_action
+                    if "oomlout_ai_roboclick" in mode_local:                    
+                        mode = "oomlout_ai_roboclick"
+                        kwargs["mode"] = mode
+                        run_single(**kwargs)
+                    if "oomlout_corel_roboclick" in mode_local:
+                        mode = "oomlout_corel_roboclick"
+                        kwargs["mode"] = mode
+                        run_single(**kwargs)
+                        for i in range(1, 10):
+                            mode = f"oomlout_corel_roboclick_{i}"
+                            kwargs["mode"] = mode
+                            run_single(**kwargs)
+                    
+                else:
+                    print(f"Skipping non-directory: {dir}")
     else:
         print(f"No directory specified, running in current directory: {os.getcwd()}")
         mode = "oomlout_ai_roboclick"
@@ -439,21 +445,35 @@ def save_image(**kwargs):
     print(f"Image saved as {file_name}")
 
 def wait_for_file(**kwargs):
+    
+
     print("wait_for_file -- skip if a necessary file doesnt exist")
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "working.png")
+    files_check = []
+    file_name = action.get("file_name", "")
+    if file_name != "":
+        files_check.append(file_name)
+    for i in range(1, 7):
+        file_name = action.get(f"file_name_{i}", "")
+        if file_name != "":
+            files_check.append(file_name)
+
     directory_absolute = kwargs.get("directory_absolute", "")
-    file_name_absolute = os.path.join(directory_absolute, file_name)
-    file_name_abs = os.path.abspath(file_name) 
-    
     
     return_value = ""
-
-    # Wait for the file to be created
-    if not os.path.exists(file_name_absolute):
-        # If the file does not exist, wait and check again
-        return_value = "exit_no_tab"        
-        print(f"File {file_name_absolute} not found.")
+    for file_name in files_check:
+        if file_name != "":
+            file_name = file_name.strip()  # Remove any leading/trailing whitespace
+            if not os.path.isabs(file_name):
+                file_name = os.path.join(directory_absolute, file_name)  # Make it absolute
+            if os.path.exists(file_name):
+                pass
+                #print(f"File {file_name} exists.")                
+            else:
+                return_value = "exit_no_tab"
+                break
+                #print(f"File {file_name} does not exist.")
+    
     return return_value
 
 if __name__ == "__main__":
