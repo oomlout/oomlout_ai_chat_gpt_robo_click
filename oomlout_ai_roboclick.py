@@ -50,9 +50,15 @@ def main(**kwargs):
         pass
         import glob
         directories = glob.glob(os.path.join(directory, "*"))
+        #remove directory from each entry
+        if True:
+            directories = [os.path.basename(dir) for dir in directories if os.path.isdir(dir)]
+            
         for dir in directories:   
             if filt == "" or filt in dir:
-                kwargs["directory"] = dir   
+                #make dir absolute
+                dir = os.path.join(directory, dir)
+                kwargs["directory"] = dir
                 directory_absolute = os.path.abspath(dir)
                 kwargs["directory_absolute"] = directory_absolute
 
