@@ -396,14 +396,29 @@ def query(**kwargs):
     robo.robo_keyboard_press_enter(delay=60)
     
 def save_image_generated(**kwargs):
-    kwargs["position_click"] = [960, 500]  # Default position for clicking the image    
+    kwargs["position_click"] = [960, 400]  # Default position for clicking the image    
     robo.robo_delay(delay=300)
     #random extra between 300 and 900 seconds
-    delay = random.randint(300, 900)
-    robo.robo_delay(delay=delay)  # Wait for the image to be generated
-    robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the image to focus
-    robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down twice to select the file input
-    save_image(**kwargs)
+    saved = False
+    y_shift = 0
+    attempts = 0
+    max_attempts = 4
+    while not saved and attempts < max_attempts:
+        delay = random.randint(300, 900)
+        robo.robo_delay(delay=delay)  # Wait for the image to be generated
+        robo.robo_mouse_click(position=[330,480+y_shift], delay=2)  # Click on the white space
+        robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down twice to select the file input
+        save_image(**kwargs)
+        file_name = kwargs.get("action", {}).get("file_name", "working.png")
+        file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
+        if os.path.exists(file_name_absolute):
+            print(f"Image saved as {file_name_absolute}")
+            saved = True
+        else:
+            print(f"Image not saved, retrying a little lower")
+            y_shift += 100
+            attempts += 1
+
 
 def save_image_search_result(**kwargs):
     kwargs["position_click"] = [813, 259]  # Default position for clicking the image
