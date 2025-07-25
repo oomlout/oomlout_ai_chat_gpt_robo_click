@@ -170,8 +170,8 @@ def run_single(**kwargs):
         elif command == "corel_paste":
             robo.robo_corel_paste(**kwargs)
         #corel trace clipart
-        elif command == "corel_trace_clipart":
-            corel_trace_clipart(**kwargs)
+        elif command == "corel_trace":
+            corel_trace(**kwargs)
         ###### file commands
         elif command == "file_copy":
             result = file_copy(**kwargs)
@@ -341,14 +341,14 @@ def corel_set_size(**kwargs):
         kwargs2["max_dimension"] = max_dimension
     robo.robo_corel_set_size(**kwargs2)
 
-def corel_trace_clipart(**kwargs):
-    print("corel_trace_clipart -- tracing clipart")
+def corel_trace(**kwargs):
+    print("corel_trace -- tracing")
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
     
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
-    robo.robo_corel_trace_clipart(**kwargs2)
+    robo.robo_corel_trace(**kwargs2)
 
 ##### file commands
 def file_copy(**kwargs):
@@ -431,19 +431,24 @@ def save_image_search_result(**kwargs):
     directory_absolute = kwargs.get("directory_absolute", "")
     file_name_absolute = os.path.join(directory_absolute, file_name)
     file_name_abs = os.path.abspath(file_name) 
+    overwrite = action.get("overwrite", True)
     print(f"Saving image as {file_name}")
-    #save the image
-    robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
-    robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
-    #press down twice
-    robo.robo_keyboard_press_down(delay=1, repeat=2)
-    robo.robo_keyboard_press_enter(delay=5)
-    robo.robo_keyboard_send(string=file_name_absolute, delay=5)
-    robo.robo_keyboard_press_enter(delay=5)
-    robo.robo_keyboard_send(string="y", delay=5)
-    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
+    if not overwrite and os.path.exists(file_name_absolute):
+        print(f"File {file_name_absolute} already exists and overwrite is disabled.")
+        return
+    else:
+        #save the image
+        robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
+        robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
+        #press down twice
+        robo.robo_keyboard_press_down(delay=1, repeat=2)
+        robo.robo_keyboard_press_enter(delay=5)
+        robo.robo_keyboard_send(string=file_name_absolute, delay=5)
+        robo.robo_keyboard_press_enter(delay=5)
+        robo.robo_keyboard_send(string="y", delay=5)
+        robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
 
-    print(f"Image saved as {file_name}")
+        print(f"Image saved as {file_name}")
 
 def save_image(**kwargs):
     position_click = kwargs.get("position_click", [960, 500])
