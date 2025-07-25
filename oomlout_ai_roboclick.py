@@ -396,9 +396,34 @@ def query(**kwargs):
     robo.robo_keyboard_press_enter(delay=60)
     
 def save_image_generated(**kwargs):
+    kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
+    robo.robo_delay(delay=300)
+    #random extra between 300 and 900 seconds
+    
+    if True:
+        delay = random.randint(300, 900)
+        robo.robo_delay(delay=delay)  # Wait for the image to be generated
+        #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
+        #click on the image to focus
+        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
+        #click on the image to focus
+        robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
+        robo.robo_keyboard_press_down(delay=1, repeat=40)  # Press down ten times to select the file input
+        save_image(**kwargs)
+        file_name = kwargs.get("action", {}).get("file_name", "working.png")
+        file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
+        if os.path.exists(file_name_absolute):
+            print(f"Image saved as {file_name_absolute}")
+            saved = True
+        else:
+            print(f"Image not saved")
+            
+
+def save_image_generated_old_try_to_multi_try_doesnt_work(**kwargs):
     kwargs["position_click"] = [960, 400]  # Default position for clicking the image    
     robo.robo_delay(delay=300)
     #random extra between 300 and 900 seconds
+    
     saved = False
     y_shift = 0
     attempts = 0
@@ -406,8 +431,12 @@ def save_image_generated(**kwargs):
     while not saved and attempts < max_attempts:
         delay = random.randint(300, 900)
         robo.robo_delay(delay=delay)  # Wait for the image to be generated
+        #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
+        #click on the image to focus
+        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
+        #click on the image to focus
         robo.robo_mouse_click(position=[330,480+y_shift], delay=2)  # Click on the white space
-        robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down twice to select the file input
+        robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down ten times to select the file input
         save_image(**kwargs)
         file_name = kwargs.get("action", {}).get("file_name", "working.png")
         file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
