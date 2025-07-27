@@ -389,7 +389,7 @@ def ai_set_mode(**kwargs):
     action = kwargs.get("action", {})
     print("ai_set_mode -- setting AI mode")
     mode = action.get("mode", "")
-    if mode == "deep_research":
+    if mode == "deep_research" or mode == "deep_research_off":
         #press tab twice
         robo.robo_keyboard_press_tab(delay=2, repeat=2)  # Press tab twice to set the mode
         #press_enter
@@ -409,7 +409,7 @@ def new_chat(**kwargs):
     #type in start query
     start_query = "Hiya, chadikins the great I have a task for you can you help?" 
     if description != "":
-        start_query += f" This chat is about  please chop this up to get a good name for the chat {description} to make it easier to find later."
+        start_query += f" This chat is about {description} please chop this up to get a good name for the chat  to make it easier to find later. You must change the name of this chat as it appears in the left hand pane"
     robo.robo_keyboard_send(string=start_query, delay=5)
     robo.robo_keyboard_press_enter(delay=20)
     #if log_url is True:
