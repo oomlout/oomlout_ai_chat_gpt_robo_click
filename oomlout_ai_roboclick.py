@@ -431,6 +431,8 @@ def new_chat(**kwargs):
                     url_data = yaml.safe_load(file)
             else:
                 url_data = []
+            if url_data == None:
+                url_data = []
             url_data.append(url)
             with open(url_file, 'w') as file:
                 yaml.dump(url_data, file)
