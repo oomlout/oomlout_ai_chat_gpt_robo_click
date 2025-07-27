@@ -179,6 +179,10 @@ def run_single(**kwargs):
         ###### file commands
         elif command == "file_copy":
             result = file_copy(**kwargs)
+        #image commands
+        #image_upscale
+        elif command == "image_upscale":
+            image_upscale(**kwargs)
         elif command == "new_chat":
             kwargs
             new_chat(**kwargs)
