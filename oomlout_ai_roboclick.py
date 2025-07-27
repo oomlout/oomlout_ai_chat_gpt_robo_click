@@ -140,6 +140,10 @@ def run_single(**kwargs):
         
         if command == "add_image":
             result = add_image(**kwargs)
+        #ai ones
+        #ai_mode
+        elif command == "ai_set_mode":
+            ai_set_mode(**kwargs)
         elif command == "close_tab":
             result = close_tab(**kwargs)
         #corel commands
@@ -377,23 +381,67 @@ def file_copy(**kwargs):
 
     return return_value
 
+def ai_set_mode(**kwargs):
+    action = kwargs.get("action", {})
+    print("ai_set_mode -- setting AI mode")
+    mode = action.get("mode", "")
+    if mode == "deep_research":
+        #press tab twice
+        robo.robo_keyboard_press_tab(delay=2, repeat=2)  # Press tab twice to set the mode
+        #press_enter
+        robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
+        ##press down 0 #times to select the deep research mode
+        #robo.robo_keyboard_press_down(delay=2, repeat=2)  # Press down twice to select the deep research mode
+        #press enter
+        robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
+        print("     AI mode set to deep research")
+
 def new_chat(**kwargs):
+    action = kwargs.get("action", {})
+    description = action.get("description", "")
+    log_url = kwargs.get("log_url", True)
     print("new_chat -- opening up a new chat")
     robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
     #type in start query
     start_query = "Hiya, chadikins the great I have a task for you can you help?" 
+    if description != "":
+        start_query += f" This chat is about  please chop this up to get a good name for the chat {description} to make it easier to find later."
     robo.robo_keyboard_send(string=start_query, delay=5)
     robo.robo_keyboard_press_enter(delay=20)
+    #if log_url is True:
+    if log_url:
+        #press ctrl l
+        robo.robo_keyboard_press_ctrl_generic(string="l", delay=2)
+        #copy the url
+        url = robo.robo_keyboard_copy(delay=2)
+        #print the url
+        print(f"    New chat URL: {url}")
+        #press esc
+        robo.robo_keyboard_press_escape(delay=2, repeat=1)
+        #save to url.yaml
+        if True:            
+            url_file = os.path.join(kwargs.get("directory_absolute", ""), "url.yaml")
+            #if url exists load it to add to the list
+            if os.path.exists(url_file):
+                with open(url_file, 'r') as file:
+                    url_data = yaml.safe_load(file)
+            else:
+                url_data = []
+            url_data.append(url)
+            with open(url_file, 'w') as file:
+                yaml.dump(url_data, file)
+
 
 def query(**kwargs):
     action = kwargs.get("action", {})
     print("query -- sending a query")
     #get the query from the action
     action = kwargs.get("action", {})
+    delay = action.get("delay", 60)
     query_text = action.get("text", "")
     robo.robo_keyboard_send(string=query_text, delay=5)
     print(f"Querying with text: {query_text}")
-    robo.robo_keyboard_press_enter(delay=60)
+    robo.robo_keyboard_press_enter(delay=delay)
     
 def save_image_generated(**kwargs):
     kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
