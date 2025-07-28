@@ -400,6 +400,43 @@ def ai_set_mode(**kwargs):
         robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
         print("     AI mode set to deep research")
 
+#image commands
+def image_upscale(**kwargs):
+    action = kwargs.get("action", {})
+    directory = kwargs.get("directory", "")
+    file_input = action.get("file_input", "")
+    file_input = os.path.join(directory, file_input)
+    #png or jpeg or jpg
+    file_output_default = file_input.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
+    file_output = action.get("file_output", file_output_default)
+    file_output = os.path.join(directory, file_output)
+    upscale_factor = action.get("upscale_factor", 2)
+    #if file_input is a file
+    if os.path.isfile(file_input):
+        #use pil; LANCZOS to upscale the image
+        from PIL import Image
+        try:
+            #if outpurt file exists, delete
+            if os.path.exists(file_output):
+                os.remove(file_output)
+                print(f"Removed existing output file {file_output}")
+            with Image.open(file_input) as img:
+                # Calculate new size
+                new_size = (int(img.width * upscale_factor), int(img.height * upscale_factor))
+                # Resize the image
+                #img = img.resize(new_size, Image.LANCZOS)
+                #use nearest
+                img = img.resize(new_size, Image.NEAREST)
+                # Save the upscaled image
+                img.save(file_output)
+                print(f"Image upscaled and saved to {file_output}")
+        except Exception as e:
+            print(f"Error upscaling image {file_input}: {e}")
+            return
+    else:
+        print(f"file_input {file_input} does not exist, skipping image upscale")
+        return
+
 def new_chat(**kwargs):
     action = kwargs.get("action", {})
     description = action.get("description", "")
