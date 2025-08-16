@@ -205,8 +205,9 @@ def run_single(**kwargs):
 def add_image(**kwargs):
     return_value = ""
     print("add_image -- adding an image")
-    kwargs["position_click"] = [750,995]
-    position_click = kwargs.get("position_click", [960, 500])
+    #kwargs["position_click"] = [750,995]
+
+    position_click = kwargs.get("position_click", [738, 982])
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "working.png")
     directory_absolute = kwargs.get("directory_absolute", "")
@@ -220,7 +221,8 @@ def add_image(**kwargs):
         return return_value
     #click on the position
     robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
-    robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
+    #robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
+    robo.robo_keyboard_press_down(delay=1, repeat=1)  # Press down twice to select the file input
     robo.robo_keyboard_press_enter(delay=5)
     robo.robo_keyboard_send(string=file_name_absolute, delay=5)  # Type the file name
     robo.robo_keyboard_press_enter(delay=5)  # Press enter to confirm
@@ -373,7 +375,6 @@ def file_copy(**kwargs):
         print("file_source or file_destination not set, skipping file copy")
         return
     
-    #check if the file exists
     if os.path.isfile(file_source):
         print(f"copying {file_source} to {file_destination}")
         #use shutil to copy the file
