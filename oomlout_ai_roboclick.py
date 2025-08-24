@@ -595,11 +595,11 @@ def save_image(**kwargs):
 
 def wait_for_file(**kwargs):
     
-
-    print("wait_for_file -- skip if a necessary file doesnt exist")
+    file_name = action.get("file_name", "")
+    print(f"wait_for_file -- skip if a necessary file doesnt exist {file_name}")
     action = kwargs.get("action", {})
     files_check = []
-    file_name = action.get("file_name", "")
+    
     if file_name != "":
         files_check.append(file_name)
     for i in range(1, 7):
