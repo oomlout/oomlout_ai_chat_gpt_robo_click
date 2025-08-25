@@ -461,7 +461,7 @@ def new_chat(**kwargs):
         #print the url
         print(f"    New chat URL: {url}")
         #press esc
-        robo.robo_keyboard_press_escape(delay=2, repeat=1)
+        robo.robo_keyboard_press_escape(delay=2, repeat=5)
         #save to url.yaml
         if True:            
             url_file = os.path.join(kwargs.get("directory_absolute", ""), "url.yaml")
