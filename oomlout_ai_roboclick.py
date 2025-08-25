@@ -549,6 +549,9 @@ def save_image_search_result(**kwargs):
     
     action = kwargs.get("action", {})
     index = action.get("index", 1)
+    #split with _ if it exists
+    if "_" in index:
+        index = index.split("_")[0]
     position_click[0] += (int(index)-1) * 200  # Adjust the x-coordinate based on the index
     file_name = action.get("file_name", "working.png")   
     directory_absolute = kwargs.get("directory_absolute", "")
