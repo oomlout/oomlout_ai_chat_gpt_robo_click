@@ -124,10 +124,15 @@ def run_single(**kwargs):
     file_test_mode = base.get("file_test_mode", "exists")
     if file_test != "":
         file_test_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_test)
+        print(f"file test mode {file_test_mode} on {file_test_absolute}")
         if file_test_mode == "exists":
             if os.path.exists(file_test_absolute):
                 print(f"File test {file_test_absolute} exists, skipping actions.")
                 return
+        elif len(file_test_absolute) > 20:
+            length = len(file_test_mode)
+            print(f"File test is {length} lone to {file_test_mode} is too long, skipping actions.")
+            return
         else:
             if not os.path.exists(file_test_absolute):
                 print(f"File test {file_test_absolute} does not exist, skipping actions.")
@@ -597,10 +602,10 @@ def save_image(**kwargs):
     print(f"Image saved as {file_name}")
 
 def wait_for_file(**kwargs):
-    
+    action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
     print(f"wait_for_file -- skip if a necessary file doesnt exist {file_name}")
-    action = kwargs.get("action", {})
+    
     files_check = []
     
     if file_name != "":
@@ -620,12 +625,13 @@ def wait_for_file(**kwargs):
                 file_name = os.path.join(directory_absolute, file_name)  # Make it absolute
             if os.path.exists(file_name):
                 pass
-                #print(f"File {file_name} exists.")                
+                print(f"file exists.")                
             else:
                 return_value = "exit_no_tab"
+                print(f"file does not exist.")
                 break
-                #print(f"File {file_name} does not exist.")
-    
+                
+
     return return_value
 
 if __name__ == "__main__":
