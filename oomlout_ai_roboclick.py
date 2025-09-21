@@ -143,81 +143,91 @@ def run_single(**kwargs):
     kwargs = copy.deepcopy(kwargs)
     kwargs["actions"] = actions 
 
-    run_action(**kwargs)
-    
-    
-def run_action(**kwargs):
-    actions = kwargs.get("actions", [])
+
     for action in actions:
         kwargs["action"] = action
-        command = action.get("command")
-        
-        if command == "add_image":
-            result = add_image(**kwargs)
-        #ai ones
-        #ai_mode
-        elif command == "ai_set_mode":
-            ai_set_mode(**kwargs)
-        elif command == "close_tab":
-            result = close_tab(**kwargs)
-        #corel commands
-        #corel_close
-        #corel add text
-        elif command == "corel_add_text":
-            corel_add_text(**kwargs)
-        elif command == "corel_close_file":
-            corel_close_file(**kwargs)        
-        elif command == "corel_import":
-            corel_import(**kwargs)
-        elif command == "corel_open":        
-            corel_open(**kwargs)
-        elif command == "corel_save":
-            corel_save(**kwargs)
-        elif command == "corel_save_as":
-            corel_save_as(**kwargs)        
-        elif command == "corel_export":
-            corel_export(**kwargs)        
-        elif command == "corel_object_order":
-            corel_object_order(**kwargs)
-        elif command == "corel_paste":
-            corel_paste(**kwargs)
-        elif command == "corel_select_all":
-            robo.robo_corel_select_all(**kwargs)
-        #corel_set_position
-        elif command == "corel_set_size":
-            corel_set_size(**kwargs)
-        elif command == "corel_set_position":
-            corel_set_position(**kwargs)
-        elif command == "corel_copy":
-            corel_copy(**kwargs)
-        elif command == "corel_paste":
-            robo.robo_corel_paste(**kwargs)
-        #corel trace clipart
-        elif command == "corel_trace":
-            corel_trace(**kwargs)
-        ###### file commands
-        elif command == "file_copy":
-            result = file_copy(**kwargs)
-        #image commands
-        #image_upscale
-        elif command == "image_upscale":
-            image_upscale(**kwargs)
-        elif command == "new_chat":
-            kwargs
-            new_chat(**kwargs)
-        elif command == "query":
-            query(**kwargs)
-        elif command == "save_image_generated":
-            save_image_generated(**kwargs)
-        elif command == "save_image_search_result":
-            save_image_search_result(**kwargs)
-        elif command == "wait_for_file":
-            result = wait_for_file(**kwargs)
-        #if result is "exit", break the loop
+        result = run_action(**kwargs)
         if result == "exit" or result == "exit_no_tab":
             print("Exiting due to 'exit' command.")
-            break   
+            break
+
     
+    
+def run_action(**kwargs):    
+    result = ""
+    action = kwargs.get("action", {})
+    command = action.get("command")
+    
+    if command == "add_image":
+        result = add_image(**kwargs)
+    #ai ones
+    #ai save_text
+    elif command == "ai_save_text":
+        ai_save_text(**kwargs)
+    #ai_mode
+    elif command == "ai_set_mode":
+        ai_set_mode(**kwargs)
+    elif command == "close_tab":
+        result = close_tab(**kwargs)
+    #corel commands
+    #corel_close
+    #corel add text
+    elif command == "corel_add_text":
+        corel_add_text(**kwargs)
+    elif command == "corel_close_file":
+        corel_close_file(**kwargs)        
+    elif command == "corel_import":
+        corel_import(**kwargs)
+    elif command == "corel_open":        
+        corel_open(**kwargs)
+    elif command == "corel_save":
+        corel_save(**kwargs)
+    elif command == "corel_save_as":
+        corel_save_as(**kwargs)        
+    elif command == "corel_export":
+        corel_export(**kwargs)        
+    elif command == "corel_object_order":
+        corel_object_order(**kwargs)
+    elif command == "corel_paste":
+        corel_paste(**kwargs)
+    elif command == "corel_select_all":
+        robo.robo_corel_select_all(**kwargs)
+    #corel_set_position
+    elif command == "corel_set_size":
+        corel_set_size(**kwargs)
+    elif command == "corel_set_position":
+        corel_set_position(**kwargs)
+    elif command == "corel_copy":
+        corel_copy(**kwargs)
+    elif command == "corel_paste":
+        robo.robo_corel_paste(**kwargs)
+    #corel trace clipart
+    elif command == "corel_trace":
+        corel_trace(**kwargs)
+    elif command == "corel_trace_full":
+        corel_trace_full(**kwargs)
+    ###### file commands
+    elif command == "file_copy":
+        result = file_copy(**kwargs)
+    #image commands
+    #image_upscale
+    elif command == "image_upscale":
+        image_upscale(**kwargs)
+    elif command == "new_chat":
+        kwargs
+        new_chat(**kwargs)
+    elif command == "query":
+        query(**kwargs)
+    elif command == "save_image_generated":
+        save_image_generated(**kwargs)
+    elif command == "save_image_search_result":
+        save_image_search_result(**kwargs)
+    elif command == "wait_for_file":
+        result = wait_for_file(**kwargs)
+    #if result is "exit", break the loop
+    
+    #if result is "exit_no_tab", dont close the tab
+    return result
 #actions
 
 
@@ -249,6 +259,28 @@ def add_image(**kwargs):
     #preess escape 5 times in case of any dialog boxes
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     return return_value
+
+
+def ai_save_text(**kwargs):
+    file_name_full = kwargs.get("file_name_full", "")
+    file_name_clip = kwargs.get("file_name_clip", "working.txt")
+    clip = kwargs.get("clip", "")
+    directory = kwargs.get("directory", "")
+
+    robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
+    text = robo.robo_keyboard_copy(delay=2)  # Copy the selected text
+    if file_name_full != "":
+        file_name_full_full = os.path.join(directory, file_name_full)
+        with open(file_name_full_full, 'w', encoding='utf-8') as f:
+            f.write(text)
+            print(f"Text saved to {file_name_full_full}")
+    if file_name_clip != "":
+        file_name_clip_full = os.path.join(directory, file_name_clip)
+        with open(file_name_clip_full, 'w', encoding='utf-8') as f:
+            #text between two clip tages
+            clipping = text.split(clip)
+            f.write(clipping)
+            print(f"Clip text saved to {file_name_clip_full}")
 
 def close_tab(**kwargs):
     print("close_tab -- closing the current tab")
@@ -402,28 +434,24 @@ def corel_set_size(**kwargs):
     robo.robo_corel_set_size(**kwargs2)
 
 def corel_trace_full(**kwargs):
-    file_source = kwargs.get("file_source", "")
+    action = kwargs.get("action", {})
+    file_source = action.get("file_source", "")
     file_source_just_file_and_extension = os.path.basename(file_source)
-    file_source_trace = kwargs.get("file_source_trace", "")
+    file_source_trace = action.get("file_source_trace", "")
     file_source_trace_just_file_and_extension = os.path.basename(file_source_trace)
     file_source_trace_just_file_and_extension_upscaled = file_source_trace_just_file_and_extension.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
-    file_destination = kwargs.get("file_destination", "")
+    file_destination = action.get("file_destination", "")
     file_destination_just_file_and_extension = os.path.basename(file_destination)
     file_destination_just_file_and_extension_pdf = file_destination_just_file_and_extension.replace(".cdr", ".pdf").replace(".png", ".pdf").replace(".jpg", ".pdf").replace(".jpeg", ".pdf")
     file_destination_just_file_and_extension_png = file_destination_just_file_and_extension.replace(".cdr", ".png").replace(".pdf", ".png").replace(".jpg", ".png").replace(".jpeg", ".png")
-    max_dimension = kwargs.get("max_dimension", 100)
-    xx = kwargs.get("x", 100)
-    yy = kwargs.get("y", 100)
+    max_dimension = action.get("max_dimension", 100)
+    xx = action.get("x", 100)
+    yy = action.get("y", 100)
 
     actions = []
 
-    #wait_for_file initial_generation.png
-    action = {}
-    action["command"] = "wait_for_file"
-    action["file_name"] = f"{file_source_trace}"                
-    actions.append(copy.deepcopy(action))
-
-    action = {}
+    #file_copy
+    action = {} 
     action["command"] = "file_copy"
     action["file_source"] = f"{file_source}"
     action["file_destination"] = f"{file_source_just_file_and_extension}"
@@ -445,9 +473,9 @@ def corel_trace_full(**kwargs):
     #corel_import
     action = {}
     action["command"] = "corel_import"
-    action["x"] = 45
-    action["y"] = 45
-    action["width"] = 85
+    action["x"] = xx
+    action["y"] = yy
+    action["width"] = max_dimension
     action["file_name"] = f"{file_source_trace_just_file_and_extension_upscaled}"
     actions.append(copy.deepcopy(action))
 
@@ -506,7 +534,7 @@ def corel_trace_full(**kwargs):
 
     for action in actions:
         kwargs["action"] = action
-        run_single(**kwargs)
+        run_action(**kwargs)
 
 def corel_trace(**kwargs):
     print("corel_trace -- tracing")
@@ -564,10 +592,12 @@ def image_upscale(**kwargs):
     directory = kwargs.get("directory", "")
     file_input = action.get("file_input", "")
     file_input = os.path.join(directory, file_input)
+    file_input_full = os.path.abspath(file_input)
     #png or jpeg or jpg
     file_output_default = file_input.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
     file_output = action.get("file_output", file_output_default)
-    file_output = os.path.join(directory, file_output)
+    if directory not in file_output:
+        file_output = os.path.join(directory, file_output)
     upscale_factor = action.get("upscale_factor", 2)
     #if file_input is a file
     if os.path.isfile(file_input):
@@ -578,7 +608,7 @@ def image_upscale(**kwargs):
             if os.path.exists(file_output):
                 os.remove(file_output)
                 print(f"Removed existing output file {file_output}")
-            with Image.open(file_input) as img:
+            with Image.open(file_input_full) as img:
                 # Calculate new size
                 new_size = (int(img.width * upscale_factor), int(img.height * upscale_factor))
                 # Resize the image
@@ -589,7 +619,7 @@ def image_upscale(**kwargs):
                 img.save(file_output)
                 print(f"Image upscaled and saved to {file_output}")
         except Exception as e:
-            print(f"Error upscaling image {file_input}: {e}")
+            print(f"Error upscaling image {file_input_full}: {e}")
             return
     else:
         print(f"file_input {file_input} does not exist, skipping image upscale")
