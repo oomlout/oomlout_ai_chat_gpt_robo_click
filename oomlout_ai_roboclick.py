@@ -139,6 +139,15 @@ def run_single(**kwargs):
                 return
 
     result = ""
+    
+    kwargs = copy.deepcopy(kwargs)
+    kwargs["actions"] = actions 
+
+    run_action(**kwargs)
+    
+    
+def run_action(**kwargs):
+    actions = kwargs.get("actions", [])
     for action in actions:
         kwargs["action"] = action
         command = action.get("command")
@@ -153,6 +162,9 @@ def run_single(**kwargs):
             result = close_tab(**kwargs)
         #corel commands
         #corel_close
+        #corel add text
+        elif command == "corel_add_text":
+            corel_add_text(**kwargs)
         elif command == "corel_close_file":
             corel_close_file(**kwargs)        
         elif command == "corel_import":
@@ -164,7 +176,9 @@ def run_single(**kwargs):
         elif command == "corel_save_as":
             corel_save_as(**kwargs)        
         elif command == "corel_export":
-            corel_export(**kwargs)
+            corel_export(**kwargs)        
+        elif command == "corel_object_order":
+            corel_object_order(**kwargs)
         elif command == "corel_paste":
             corel_paste(**kwargs)
         elif command == "corel_select_all":
@@ -244,6 +258,29 @@ def close_tab(**kwargs):
     robo.robo_delay(delay=5)  # Wait for the tab to close
 
 ##### corel commands
+
+def corel_add_text(**kwargs):
+    print("corel_add_text -- adding text in corel")
+    action = kwargs.get("action", {})
+    text = action.get("text", "Hello World")
+    x = action.get("x", 100)
+    y = action.get("y", 100)
+    font = action.get("font", "Arial")
+    font_size = action.get("font_size", 12)
+    bold = action.get("bold", False)
+    italic = action.get("italic", False)
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["text"] = text
+    kwargs2["x"] = x
+    kwargs2["y"] = y
+    kwargs2["font"] = font
+    kwargs2["font_size"] = font_size
+    kwargs2["bold"] = bold
+    kwargs2["italic"] = italic
+    robo.robo_corel_add_text(**kwargs2)
+    #wait for 2 seconds
+    robo.robo_delay(delay=2)  # Wait for the text to be added
+
 def corel_copy(**kwargs):
     print("corel_copy -- copying selected items in corel")
     #copy selected items in corel
@@ -287,6 +324,14 @@ def corel_import(**kwargs):
         kwargs2["max_dimension"] = max_dimension
 
     robo.robo_corel_import_file(**kwargs2)
+
+def corel_object_order(**kwargs):
+    print("corel_object_order -- changing object order in corel")
+    action = kwargs.get("action", {})
+    order = action.get("order", "to_front")
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["order"] = order
+    robo.robo_corel_object_order(**kwargs2)
 
 def corel_open(**kwargs):
     action = kwargs.get("action", {})
@@ -355,6 +400,113 @@ def corel_set_size(**kwargs):
     if max_dimension != "":
         kwargs2["max_dimension"] = max_dimension
     robo.robo_corel_set_size(**kwargs2)
+
+def corel_trace_full(**kwargs):
+    file_source = kwargs.get("file_source", "")
+    file_source_just_file_and_extension = os.path.basename(file_source)
+    file_source_trace = kwargs.get("file_source_trace", "")
+    file_source_trace_just_file_and_extension = os.path.basename(file_source_trace)
+    file_source_trace_just_file_and_extension_upscaled = file_source_trace_just_file_and_extension.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
+    file_destination = kwargs.get("file_destination", "")
+    file_destination_just_file_and_extension = os.path.basename(file_destination)
+    file_destination_just_file_and_extension_pdf = file_destination_just_file_and_extension.replace(".cdr", ".pdf").replace(".png", ".pdf").replace(".jpg", ".pdf").replace(".jpeg", ".pdf")
+    file_destination_just_file_and_extension_png = file_destination_just_file_and_extension.replace(".cdr", ".png").replace(".pdf", ".png").replace(".jpg", ".png").replace(".jpeg", ".png")
+    max_dimension = kwargs.get("max_dimension", 100)
+    xx = kwargs.get("x", 100)
+    yy = kwargs.get("y", 100)
+
+    actions = []
+
+    #wait_for_file initial_generation.png
+    action = {}
+    action["command"] = "wait_for_file"
+    action["file_name"] = f"{file_source_trace}"                
+    actions.append(copy.deepcopy(action))
+
+    action = {}
+    action["command"] = "file_copy"
+    action["file_source"] = f"{file_source}"
+    action["file_destination"] = f"{file_source_just_file_and_extension}"
+    actions.append(copy.deepcopy(action))
+
+    #corel_open
+    action = {}
+    action["command"] = "corel_open"
+    action["file_name"] = f"{file_source_just_file_and_extension}"
+    actions.append(copy.deepcopy(action))
+
+    #image_upscale
+    action = {}
+    action["command"] = "image_upscale"
+    action["file_input"] = f"{file_source_trace_just_file_and_extension}"
+    action["scale"] = 4
+    actions.append(copy.deepcopy(action))
+
+    #corel_import
+    action = {}
+    action["command"] = "corel_import"
+    action["x"] = 45
+    action["y"] = 45
+    action["width"] = 85
+    action["file_name"] = f"{file_source_trace_just_file_and_extension_upscaled}"
+    actions.append(copy.deepcopy(action))
+
+    #corel_save
+    action = {}
+    action["command"] = "corel_save"
+    actions.append(copy.deepcopy(action))
+
+    #corel_save_as
+    action = {}
+    action["command"] = "corel_save_as"
+    action["file_name"] = f"{file_destination_just_file_and_extension}"
+    actions.append(copy.deepcopy(action))
+
+    #trace_clipart
+    action = {}
+    action["command"] = "corel_trace"
+    actions.append(copy.deepcopy(action))
+
+    #corel_set_size
+    action = {}
+    action["command"] = "corel_set_size"
+    action["max_dimension"] = {max_dimension}
+    actions.append(copy.deepcopy(action))
+
+    #corel_set_position
+    action = {}
+    action["command"] = "corel_set_position"
+    action["x"] = xx
+    action["y"] = yy
+    actions.append(copy.deepcopy(action))
+
+    #corel_save
+    action = {}
+    action["command"] = "corel_save"
+    actions.append(copy.deepcopy(action))
+
+    #export as pdf
+    action = {}
+    action["command"] = "corel_export"                
+    action["file_name"] = f"{file_destination_just_file_and_extension_pdf}"
+    action["file_type"] = "pdf"
+    actions.append(copy.deepcopy(action))
+
+    #export png
+    action = {}
+    action["command"] = "corel_export"
+    action["file_name"] = f"{file_destination_just_file_and_extension_png}"
+    action["file_type"] = "png"
+    actions.append(copy.deepcopy(action))
+
+    #corel close
+    action = {}
+    action["command"] = "corel_close_file"
+    actions.append(copy.deepcopy(action))
+
+    for action in actions:
+        kwargs["action"] = action
+        run_single(**kwargs)
 
 def corel_trace(**kwargs):
     print("corel_trace -- tracing")
