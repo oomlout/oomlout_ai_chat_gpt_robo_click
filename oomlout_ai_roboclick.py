@@ -640,7 +640,7 @@ def new_chat(**kwargs):
     start_query = ""
     if description != "":
         #start_query += f" This chat is about {description} please chop this up to get a good name for the chat  to make it easier to find later. You must change the name of this chat to the name you come up with, the first option no need to double check just do it"
-        start_query += f" Hi, please name this chat: {description} Make it shorter and easier to find later, and set that as the chat title."
+        start_query += f" Hi, please name this chat: {description} Make it shorter and easier to find later, and set that as the chat title. This only applies to this chat no need to add it to memory."
     start_query += " Chadikins the best let do this!"
     robo.robo_keyboard_send(string=start_query, delay=5)
     robo.robo_keyboard_press_enter(delay=20)
