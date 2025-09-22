@@ -262,9 +262,10 @@ def add_image(**kwargs):
 
 
 def ai_save_text(**kwargs):
-    file_name_full = kwargs.get("file_name_full", "")
-    file_name_clip = kwargs.get("file_name_clip", "working.txt")
-    clip = kwargs.get("clip", "")
+    action = kwargs.get("action", {})
+    file_name_full = action.get("file_name_full", "text.txt")
+    file_name_clip = action.get("file_name_clip", "clip.txt")
+    clip = action.get("clip", " ")
     directory = kwargs.get("directory", "")
 
     robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
@@ -279,6 +280,10 @@ def ai_save_text(**kwargs):
         with open(file_name_clip_full, 'w', encoding='utf-8') as f:
             #text between two clip tages
             clipping = text.split(clip)
+            if len(clipping) > 1:
+                clipping = clipping[1]
+            else:
+                clipping = text
             f.write(clipping)
             print(f"Clip text saved to {file_name_clip_full}")
 
