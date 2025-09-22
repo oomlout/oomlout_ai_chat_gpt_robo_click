@@ -638,9 +638,8 @@ def new_chat(**kwargs):
     robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
     #type in start query
     start_query = ""
-    if description != "":
-        #start_query += f" This chat is about {description} please chop this up to get a good name for the chat  to make it easier to find later. You must change the name of this chat to the name you come up with, the first option no need to double check just do it"
-        start_query += f" Hi, please name this chat: {description} Make it shorter and easier to find later, and set that as the chat title. This only applies to this chat no need to add it to memory."
+    if description != "":        
+        start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
     start_query += " Chadikins the best let do this!"
     robo.robo_keyboard_send(string=start_query, delay=5)
     robo.robo_keyboard_press_enter(delay=20)
