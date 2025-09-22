@@ -453,6 +453,7 @@ def corel_trace_full(**kwargs):
     file_destination_just_file_and_extension = os.path.basename(file_destination)
     file_destination_just_file_and_extension_pdf = file_destination_just_file_and_extension.replace(".cdr", ".pdf").replace(".png", ".pdf").replace(".jpg", ".pdf").replace(".jpeg", ".pdf")
     file_destination_just_file_and_extension_png = file_destination_just_file_and_extension.replace(".cdr", ".png").replace(".pdf", ".png").replace(".jpg", ".png").replace(".jpeg", ".png")
+    
     max_dimension = action.get("max_dimension", 100)
     xx = action.get("x", 100)
     yy = action.get("y", 100)
@@ -463,13 +464,13 @@ def corel_trace_full(**kwargs):
     action = {} 
     action["command"] = "file_copy"
     action["file_source"] = f"{file_source}"
-    action["file_destination"] = f"{file_source_just_file_and_extension}"
+    action["file_destination"] = f"{file_destination_just_file_and_extension}"
     actions.append(copy.deepcopy(action))
 
     #corel_open
     action = {}
     action["command"] = "corel_open"
-    action["file_name"] = f"{file_source_just_file_and_extension}"
+    action["file_name"] = f"{file_destination_just_file_and_extension}"
     actions.append(copy.deepcopy(action))
 
     #image_upscale
