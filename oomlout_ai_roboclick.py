@@ -73,7 +73,7 @@ def main(**kwargs):
             else:
                 run = filt in dir or filt == "" 
             #if filt == "" or filt in dir:
-            if run
+            if run:
                 #make dir absolute
                 dir = os.path.join(directory, dir)
                 kwargs["directory"] = dir
