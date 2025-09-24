@@ -9,6 +9,14 @@ import os
 def main(**kwargs):
     mode = kwargs.get("mode", "")
     filt = kwargs.get("filter", "")
+    filt_all = kwargs.get("filter_all", None)
+    filt_or = kwargs.get("filter_or", None)
+    
+    #if filter isn't "" and filt_all or filt_or have something make an errror about too many filters
+    if filt != "" and (filt_all is not None or filt_or is not None):
+        print("Error: Too many filters specified. Please use only one of 'filter', 'filter_all', or 'filter_or'.")
+        return
+    
     #if mode isnt a list make it one
     if not isinstance(mode, list):
         mode = [mode]
@@ -54,8 +62,18 @@ def main(**kwargs):
         if True:
             directories = [os.path.basename(dir) for dir in directories if os.path.isdir(dir)]
             
-        for dir in directories:   
-            if filt == "" or filt in dir:
+        for dir in directories:  
+            run = False
+            if filt_all is not None and filt_all != []:
+                #check if all filt_all are in dir
+                run = all(f in dir for f in filt_all)
+            elif filt_or is not None and filt_or != []:
+                #check if any filt_or are in dir
+                run = any(f in dir for f in filt_or)
+            else:
+                run = filt in dir or filt == "" 
+            #if filt == "" or filt in dir:
+            if run
                 #make dir absolute
                 dir = os.path.join(directory, dir)
                 kwargs["directory"] = dir
