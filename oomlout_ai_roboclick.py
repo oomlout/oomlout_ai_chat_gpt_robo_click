@@ -258,6 +258,36 @@ def add_image(**kwargs):
     print("add_image -- adding an image")
     #kwargs["position_click"] = [750,995]
 
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "working.png")
+    directory_absolute = kwargs.get("directory_absolute", "")
+    file_name_absolute = os.path.join(directory_absolute, file_name)
+    file_name_abs = os.path.abspath(file_name) 
+    print(f"Adding image {file_name} at position {position_click}")
+    #test if filename exists
+    if not os.path.exists(file_name_absolute):
+        print(f"File {file_name_absolute} does not exist, skipping action.")
+        return_value = "exit"
+        return return_value
+    #tab once
+    robo.robo_keyboard_press_tab(delay=2, repeat=1)  # Press tab once to focus on the add image button
+    #down zero times
+    #robo.robo_keyboard_press_down(delay=1, repeat=1)  # Press down zero times to select the file input
+    #enter once
+    robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
+    #robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
+    robo.robo_keyboard_send(string=file_name_absolute, delay=5)  # Type the file name
+    robo.robo_keyboard_press_enter(delay=5)  # Press enter to confirm
+    robo.robo_delay(delay=15)  # Wait for the image to be added
+    #preess escape 5 times in case of any dialog boxes
+    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
+    return return_value
+
+def add_image_old_1(**kwargs):
+    return_value = ""
+    print("add_image -- adding an image")
+    #kwargs["position_click"] = [750,995]
+
     position_click = kwargs.get("position_click", [738, 982])
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "working.png")
@@ -303,7 +333,7 @@ def ai_save_text(**kwargs):
             #text between two clip tages
             clipping = text.split(clip)
             if len(clipping) > 1:
-                clipping = clipping[1]
+                clipping = clipping[len(clipping)-2]
             else:
                 clipping = text
             f.write(clipping)
@@ -605,9 +635,11 @@ def ai_set_mode(**kwargs):
     mode = action.get("mode", "")
     if mode == "deep_research" or mode == "deep_research_off":
         #press tab twice
-        robo.robo_keyboard_press_tab(delay=2, repeat=2)  # Press tab twice to set the mode
+        robo.robo_keyboard_press_tab(delay=2, repeat=1)  # Press tab twice to set the mode        
         #press_enter
         robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
+        #press down once
+        robo.robo_keyboard_press_down(delay=2, repeat=1)
         ##press down 0 #times to select the deep research mode
         #robo.robo_keyboard_press_down(delay=2, repeat=2)  # Press down twice to select the deep research mode
         #press enter
