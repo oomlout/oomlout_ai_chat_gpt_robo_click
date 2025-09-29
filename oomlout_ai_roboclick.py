@@ -263,7 +263,7 @@ def add_image_tab_version_doesnt_work_if_rtext_box_not_selected(**kwargs):
     directory_absolute = kwargs.get("directory_absolute", "")
     file_name_absolute = os.path.join(directory_absolute, file_name)
     file_name_abs = os.path.abspath(file_name) 
-    print(f"Adding image {file_name} at position {position_click}")
+    #print(f"Adding image {file_name} at position {position_click}")
     #test if filename exists
     if not os.path.exists(file_name_absolute):
         print(f"File {file_name_absolute} does not exist, skipping action.")
