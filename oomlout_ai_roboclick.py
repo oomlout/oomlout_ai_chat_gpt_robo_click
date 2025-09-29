@@ -253,7 +253,7 @@ def run_action(**kwargs):
 #actions
 
 
-def add_image(**kwargs):
+def add_image_tab_version_doesnt_work_if_rtext_box_not_selected(**kwargs):
     return_value = ""
     print("add_image -- adding an image")
     #kwargs["position_click"] = [750,995]
@@ -283,7 +283,7 @@ def add_image(**kwargs):
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     return return_value
 
-def add_image_old_1(**kwargs):
+def add_image(**kwargs):
     return_value = ""
     print("add_image -- adding an image")
     #kwargs["position_click"] = [750,995]
