@@ -193,7 +193,10 @@ def run_action(**kwargs):
         result = close_tab(**kwargs)
     #corel commands
     #corel_close
-    #corel add text
+    #convert svg_to_pdf
+    elif command == "convert_svg_to_pdf":
+        convert_svg_to_pdf(**kwargs)
+    #corel add text        
     elif command == "corel_add_text":
         corel_add_text(**kwargs)
     elif command == "corel_close_file":
@@ -244,6 +247,9 @@ def run_action(**kwargs):
         save_image_generated(**kwargs)
     elif command == "save_image_search_result":
         save_image_search_result(**kwargs)
+    #text_jinja_template
+    elif command == "text_jinja_template":
+        text_jinja_template(**kwargs)
     elif command == "wait_for_file":
         result = wait_for_file(**kwargs)
     #if result is "exit", break the loop
@@ -345,6 +351,18 @@ def close_tab(**kwargs):
     robo.robo_chrome_close_tab(**kwargs)
     #wait for 5 seconds
     robo.robo_delay(delay=5)  # Wait for the tab to close
+
+##### convert commands
+def convert_svg_to_pdf(**kwargs):
+    directory = kwargs.get("directory", "")
+    action = kwargs.get("action", {})
+    file_input = action.get("file_input", "")
+    kwargs["file_input"] = f"{directory}\\{file_input}"
+    file_output = action.get("file_output", "")
+    if file_output == "":
+        file_output = file_input.replace(".svg", ".pdf")
+    kwargs["file_output"] = f"{directory}\\{file_output}"
+    robo.robo_convert_svg_to_pdf(**kwargs)
 
 ##### corel commands
 
@@ -841,6 +859,26 @@ def save_image(**kwargs):
     robo.robo_keyboard_send(string="y", delay=5)
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     print(f"Image saved as {file_name}")
+
+def text_jinja_template(**kwargs):
+    action = kwargs.get("action", {})
+    directory = kwargs.get("directory", "")    
+    kwargs["directory"] = directory
+    file_template = action.get("file_template", "template.txt")
+    kwargs["file_template"] = f"{directory}\\{file_template}"
+    file_source = action.get("file_source", f"{directory}/working.yaml")
+    kwargs["file_source"] = file_source
+    file_output = action.get("file_output", "output.txt")
+    kwargs["file_output"] = f"{directory}\\{file_output}"
+    robo.robo_text_jinja_template(**kwargs)
+    convert_to_pdf = action.get("convert_to_pdf", False)
+    if convert_to_pdf:
+        file_output_pdf = file_output.replace(".svg", ".pdf")
+        kwargs["file_input"] = f"{directory}\\{file_output}"
+        kwargs["file_output"] = f"{directory}\\{file_output_pdf}"
+        robo.robo_convert_svg_to_pdf(**kwargs)
+    
+
 
 def wait_for_file(**kwargs):
     action = kwargs.get("action", {})
