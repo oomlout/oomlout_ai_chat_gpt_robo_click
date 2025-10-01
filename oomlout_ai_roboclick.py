@@ -82,6 +82,17 @@ def main(**kwargs):
 
                 if os.path.isdir(dir):
                     file_action = os.path.join(dir, "working.yaml")
+                    #load workings into kwargs
+                    kwargs["workings"] = {}
+                    try:
+                        with open(file_action, 'r') as file:
+                            kwargs["workings"] = yaml.safe_load(file)
+                            print(f"Workings loaded from {file_action}: {len(kwargs['workings'])} items found")
+                    except FileNotFoundError:
+                        print(f"Workings file {file_action} not found.")
+                    except yaml.YAMLError as e:
+                        print(f"Error parsing YAML file {file_action}: {e}")
+
                     print(f"running file_action: {file_action}")
                     kwargs["file_action"] = file_action
                     if "oomlout_ai_roboclick" in mode_local:                    
@@ -119,26 +130,31 @@ def run_single(**kwargs):
     mode = kwargs.get("mode", "")
     # Load actions from YAML file
     if True:
-        print(f"loading configuration from {file_action}")
-        try:
-            with open(file_action, 'r') as file:
-                workings = yaml.safe_load(file)
-                print(f"Configuration loaded from {file_action}: {len(workings)}")
-        except FileNotFoundError:
-            print(f"Configuration file {file_action} not found.")
-            return
-        except yaml.YAMLError as e:
-            print(f"Error parsing YAML file {file_action}: {e}")
-            return
-        
+        #load_workings from file
+        if False:
+            print(f"loading configuration from {file_action}")
+            try:
+                with open(file_action, 'r') as file:
+                    workings = yaml.safe_load(file)
+                    print(f"Configuration loaded from {file_action}: {len(workings)}")
+            except FileNotFoundError:
+                print(f"Configuration file {file_action} not found.")
+                return
+            except yaml.YAMLError as e:
+                print(f"Error parsing YAML file {file_action}: {e}")
+                return
+        if True:
+            workings = kwargs.get("workings", {})
+
+
         base = workings.get(mode, [])
         if base != []:
             actions = base.get("actions", {})
         else:
-            print(f"No actions found for mode {mode} in {file_action}")
+            #print(f"No actions found for mode {mode} in {file_action}")
             return
-
     
+            
 
     print(f"Running with actions: {len(actions)}")
 
