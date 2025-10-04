@@ -21,6 +21,19 @@ def main(**kwargs):
     if not isinstance(mode, list):
         mode = [mode]
         kwargs["mode"] = mode
+
+    count = 0
+    for i in range(len(mode)):
+        m = mode[i]
+        if m == "" or m == "all":
+            mode[i] = "oomlout_ai_roboclick"
+            mode.append("oomlout_corel_roboclick")
+        if m == "corel":
+            mode[i] = "oomlout_corel_roboclick"
+        if m == "ai":
+            mode[i] = "oomlout_ai_roboclick"
+        
+
     mode_local = copy.deepcopy(mode)
     #load confuiguration
     if True:
