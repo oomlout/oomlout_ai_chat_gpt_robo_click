@@ -212,6 +212,9 @@ def run_action(**kwargs):
     if command == "add_image":
         result = add_image(**kwargs)
     #ai ones
+    #ai_fix_yaml_copy_paste
+    if command == "ai_fix_yaml_copy_paste":
+        ai_fix_yaml_copy_paste(**kwargs)
     #ai save_text
     elif command == "ai_save_text":
         ai_save_text(**kwargs)
@@ -348,10 +351,72 @@ def add_image(**kwargs):
     return return_value
 
 
+def ai_fix_yaml_copy_paste(**kwargs):
+    action = kwargs.get("action", {})
+    file_input = action.get("file_input", "working.yaml")
+    file_output = action.get("file_output", "working_fixed.yaml")
+    directory = kwargs.get("directory", "")
+    remove_top_level = action.get("remove_top_level", False)
+    new_item_name = action.get("new_item_name", "")
+    #load input file
+    with open(os.path.join(directory, file_input), 'r', encoding='utf-8') as f:
+        text = f.read()
+    #replace all double line breaks with singles
+    if True:
+        text = text.replace("\n\n", "\n")
+    #remvoe_top_level
+    if True:
+        #if remove_top_level is a string make it an array
+        if isinstance(remove_top_level, str):
+            remove_top_level = [remove_top_level]
+        for tag in remove_top_level:
+            lines = text.split("\n")
+            new_lines = []
+            skip = False
+            for line in lines:
+                if line.strip().startswith(f"{tag}:"):
+                    skip = True
+                    continue
+                if skip:
+                    if line.startswith(" "):
+                        continue
+                    else:
+                        skip = False
+                new_lines.append(line)
+            text = "\n".join(new_lines)
+    #new_item_name
+    if True:
+        #if the line starts new_item name : then add "- "
+        #if it has text add two spaces
+        if new_item_name != "":
+            lines = text.split("\n")
+            new_lines = []
+            for line in lines:
+                if line.strip().startswith(f"{new_item_name}:"):
+                    new_lines.append(f"- {line}")
+                    continue
+                else:
+                    new_lines.append(f"  {line}")
+            text = "\n".join(new_lines)
+    #remove any lines that are all whitespace
+    if True:
+        lines = text.split("\n")
+        new_lines = []
+        for line in lines:
+            if line.strip() == "":
+                continue
+            new_lines.append(line)
+        text = "\n".join(new_lines)
+    #save output file
+    with open(os.path.join(directory, file_output), 'w', encoding='utf-8') as f:
+        f.write(text)
+    pass
+
 def ai_save_text(**kwargs):
     action = kwargs.get("action", {})
     file_name_full = action.get("file_name_full", "text.txt")
     file_name_clip = action.get("file_name_clip", "clip.txt")
+    
     clip = action.get("clip", " ")
     directory = kwargs.get("directory", "")
 
