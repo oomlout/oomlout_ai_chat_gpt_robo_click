@@ -22,6 +22,16 @@ def main(**kwargs):
         mode = [mode]
         kwargs["mode"] = mode
     mode_local = copy.deepcopy(mode)
+
+    for i in range(len(mode_local)):
+        m = mode_local[i]   
+        if m == "all":
+            mode_local[i] = "oomlout_ai_roboclick"
+            mode_local.append("oomlout_corel_roboclick")
+        elif m == "ai":
+            mode_local[i] = ["oomlout_ai_roboclick"]
+        elif m == "corel":
+            mode_local[i] = ["oomlout_corel_roboclick"]
     #load confuiguration
     if True:
         config_file = "configuration\\oomlout_ai_chat_gpt_robo_click_configuration.yaml"
