@@ -25,7 +25,7 @@ def main(**kwargs):
 
     for i in range(len(mode_local)):
         m = mode_local[i]   
-        if m == "all":
+        if m == "all" or m == "" :
             mode_local[i] = "oomlout_ai_roboclick"
             mode_local.append("oomlout_corel_roboclick")
         elif m == "ai":
