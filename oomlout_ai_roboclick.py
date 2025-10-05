@@ -21,19 +21,6 @@ def main(**kwargs):
     if not isinstance(mode, list):
         mode = [mode]
         kwargs["mode"] = mode
-
-    count = 0
-    for i in range(len(mode)):
-        m = mode[i]
-        if m == "" or m == "all":
-            mode[i] = "oomlout_ai_roboclick"
-            mode.append("oomlout_corel_roboclick")
-        if m == "corel":
-            mode[i] = "oomlout_corel_roboclick"
-        if m == "ai":
-            mode[i] = "oomlout_ai_roboclick"
-        
-
     mode_local = copy.deepcopy(mode)
     #load confuiguration
     if True:
@@ -709,11 +696,16 @@ def corel_trace_full(**kwargs):
 def corel_trace(**kwargs):
     print("corel_trace -- tracing")
     action = kwargs.get("action", {})
+    kwargs2 = copy.deepcopy(kwargs)    
     file_name = action.get("file_name", "")
-    remove_background_color_from_entire_image = action.get("remove_background_color_from_entire_image", False)
-    number_of_colors = action.get("number_of_colors", None)
-    kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
+    remove_background_color_from_entire_image = action.get("remove_background_color_from_entire_image", False)
+    kwargs2["remove_background_color_from_entire_image"] = remove_background_color_from_entire_image    
+    number_of_colors = action.get("number_of_colors", None)
+    if number_of_colors is not None:
+        kwargs2["number_of_colors"] = number_of_colors
+    
+    
     robo.robo_corel_trace(**kwargs2)
 
 ##### file commands
@@ -827,11 +819,7 @@ def new_chat(**kwargs):
             #if url exists load it to add to the list
             if os.path.exists(url_file):
                 with open(url_file, 'r') as file:
-                    try:
-                        url_data = yaml.safe_load(file)
-                    except Exception as e:
-                        print(f"Error parsing YAML file {url_file}: {e}")
-                        url_data = []
+                    url_data = yaml.safe_load(file)
             else:
                 url_data = []
             if url_data == None:
