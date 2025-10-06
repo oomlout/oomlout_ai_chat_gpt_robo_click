@@ -212,6 +212,9 @@ def run_action(**kwargs):
     #ai_fix_yaml_copy_paste
     if command == "ai_fix_yaml_copy_paste":
         ai_fix_yaml_copy_paste(**kwargs)
+    #ai_save_image
+    elif command == "ai_save_image":
+        save_image_generated(**kwargs)
     #ai save_text
     elif command == "ai_save_text":
         ai_save_text(**kwargs)
