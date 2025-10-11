@@ -231,6 +231,8 @@ def run_action(**kwargs):
     #corel add text        
     elif command == "corel_add_text":
         corel_add_text(**kwargs)
+    elif command == "corel_add_text_box":
+        corel_add_text_box(**kwargs)    
     elif command == "corel_close_file":
         corel_close_file(**kwargs)        
     elif command == "corel_import":
@@ -356,8 +358,9 @@ def ai_fix_yaml_copy_paste(**kwargs):
     file_input = action.get("file_input", "working.yaml")
     file_output = action.get("file_output", "working_fixed.yaml")
     directory = kwargs.get("directory", "")
-    remove_top_level = action.get("remove_top_level", False)
+    remove_top_level = action.get("remove_top_level", [])
     new_item_name = action.get("new_item_name", "")
+    search_and_replace = action.get("search_and_replace", [])
     #load input file
     with open(os.path.join(directory, file_input), 'r', encoding='utf-8') as f:
         text = f.read()
@@ -407,6 +410,15 @@ def ai_fix_yaml_copy_paste(**kwargs):
                 continue
             new_lines.append(line)
         text = "\n".join(new_lines)
+    #search_and_replace
+    if search_and_replace != []:
+        for item in search_and_replace:
+            search = item[0]
+            replace = item[1]
+            if search != "":
+                text = text.replace(search, replace)
+    
+    
     #save output file
     with open(os.path.join(directory, file_output), 'w', encoding='utf-8') as f:
         f.write(text)
@@ -479,6 +491,32 @@ def corel_add_text(**kwargs):
     kwargs2["bold"] = bold
     kwargs2["italic"] = italic
     robo.robo_corel_add_text(**kwargs2)
+    #wait for 2 seconds
+    robo.robo_delay(delay=2)  # Wait for the text to be added
+
+def corel_add_text_box(**kwargs):
+    print("corel_add_text -- adding text in corel")
+    action = kwargs.get("action", {})
+    text = action.get("text", "Hello World")
+    x = action.get("x", 100)
+    y = action.get("y", 100)
+    width = action.get("width", 200)
+    height = action.get("height", 100)
+    font = action.get("font", "Arial")
+    font_size = action.get("font_size", 12)
+    bold = action.get("bold", False)
+    italic = action.get("italic", False)
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["text"] = text
+    kwargs2["x"] = x
+    kwargs2["y"] = y
+    kwargs2["font"] = font
+    kwargs2["font_size"] = font_size
+    kwargs2["bold"] = bold
+    kwargs2["italic"] = italic
+    kwargs2["width"] = width
+    kwargs2["height"] = height
+    robo.robo_corel_add_text_box(**kwargs2)
     #wait for 2 seconds
     robo.robo_delay(delay=2)  # Wait for the text to be added
 
