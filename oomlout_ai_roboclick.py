@@ -642,6 +642,7 @@ def corel_set_size(**kwargs):
 
 def corel_trace_full(**kwargs):
     action = kwargs.get("action", {})
+    action_main = copy.deepcopy(action)
     file_source = action.get("file_source", "")
     file_source_just_file_and_extension = os.path.basename(file_source)
     file_source_trace = action.get("file_source_trace", "")
@@ -701,6 +702,10 @@ def corel_trace_full(**kwargs):
     #trace_clipart
     action = {}
     action["command"] = "corel_trace"
+    if "number_of_colors" in action_main:
+        action["number_of_colors"] = action_main["number_of_colors"]
+    if "remove_background_color_from_entire_image" in action_main:
+        action["remove_background_color_from_entire_image"] = action_main["remove_background_color_from_entire_image"]
     actions.append(copy.deepcopy(action))
 
     #corel_set_size
@@ -758,6 +763,8 @@ def corel_trace(**kwargs):
     
     
     robo.robo_corel_trace(**kwargs2)
+    pass
+            
 
 ##### file commands
 def file_copy(**kwargs):
