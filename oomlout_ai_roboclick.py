@@ -575,6 +575,9 @@ def corel_object_order(**kwargs):
 def corel_open(**kwargs):
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
+    #if file_name is "" try file_source
+    if file_name == "":
+        file_name = action.get("file_source", "")
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     robo.robo_corel_open(**kwargs2)
