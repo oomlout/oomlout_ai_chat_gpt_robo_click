@@ -615,6 +615,8 @@ def corel_save(**kwargs):
 def corel_save_as(**kwargs):
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
+    if file_name == "":
+        file_name = action.get("file_destination", "")
     
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
@@ -711,6 +713,9 @@ def corel_trace_full(**kwargs):
         action["number_of_colors"] = action_main["number_of_colors"]
     if "remove_background_color_from_entire_image" in action_main:
         action["remove_background_color_from_entire_image"] = action_main["remove_background_color_from_entire_image"]
+    if "detail_minus" in action_main:
+        action["detail_minus"] = action_main["detail_minus"]
+
     actions.append(copy.deepcopy(action))
 
     #corel_set_size
@@ -765,6 +770,9 @@ def corel_trace(**kwargs):
     number_of_colors = action.get("number_of_colors", None)
     if number_of_colors is not None:
         kwargs2["number_of_colors"] = number_of_colors
+    detail_minus = action.get("detail_minus", None)
+    if detail_minus is not None:
+        kwargs2["detail_minus"] = detail_minus
     
     
     robo.robo_corel_trace(**kwargs2)
