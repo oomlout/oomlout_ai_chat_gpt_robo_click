@@ -543,6 +543,8 @@ def corel_export(**kwargs):
 def corel_import(**kwargs):
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
+    if file_name == "":
+        file_name = action.get("file_source", "")
     x = action.get("x", "")
     y = action.get("y", "")
     width = action.get("width", "")
