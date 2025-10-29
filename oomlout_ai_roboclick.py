@@ -872,7 +872,8 @@ def new_chat(**kwargs):
     #type in start query
     start_query = ""
     if description != "":        
-        start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
+        #start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
+        start_query += f"  Hi, CHadikins I hope your day is going well! lets get to this!. Chadikins the best let do this! i like it when you are chatty and suggest things based on what i've done in the past. like the bullet point formated version. take all the time you need."
     start_query += " Chadikins the best let do this!"
     robo.robo_keyboard_send(string=start_query, delay=5)
     robo.robo_keyboard_press_enter(delay=20)
