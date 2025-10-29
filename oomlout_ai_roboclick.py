@@ -534,6 +534,8 @@ def corel_close_file(**kwargs):
 def corel_export(**kwargs):
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
+    if file_name == "":
+        file_name = action.get("file_destination", "")
     file_type = action.get("file_type", "pdf")
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
