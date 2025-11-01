@@ -1033,11 +1033,17 @@ def text_jinja_template(**kwargs):
     kwargs["file_output"] = f"{directory}\\{file_output}"
     robo.robo_text_jinja_template(**kwargs)
     convert_to_pdf = action.get("convert_to_pdf", False)
+    convert_to_png = action.get("convert_to_png", False)
     if convert_to_pdf:
         file_output_pdf = file_output.replace(".svg", ".pdf")
         kwargs["file_input"] = f"{directory}\\{file_output}"
         kwargs["file_output"] = f"{directory}\\{file_output_pdf}"
         robo.robo_convert_svg_to_pdf(**kwargs)
+    if convert_to_png:
+        file_output_png = file_output.replace(".svg", ".png")
+        kwargs["file_input"] = f"{directory}\\{file_output}"
+        kwargs["file_output"] = f"{directory}\\{file_output_png}"
+        robo.robo_convert_svg_to_png(**kwargs)
     
 
 
