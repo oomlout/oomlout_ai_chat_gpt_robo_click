@@ -667,6 +667,7 @@ def corel_trace_full(**kwargs):
     delay_trace = action.get("delay_trace", 30)
     delay_png = action.get("delay_png", 10)
     max_dimension = action.get("max_dimension", 100)
+    detail_minus = action.get("detail_minus", 0)
     xx = action.get("x", 100)
     yy = action.get("y", 100)
 
@@ -719,8 +720,8 @@ def corel_trace_full(**kwargs):
         action["number_of_colors"] = action_main["number_of_colors"]
     if "remove_background_color_from_entire_image" in action_main:
         action["remove_background_color_from_entire_image"] = action_main["remove_background_color_from_entire_image"]
-    if "detail_minus" in action_main:
-        action["detail_minus"] = action_main["detail_minus"]
+    if detail_minus != 0:
+        action["detail_minus"] = detail_minus
     if "delay_trace" in action_main:
         action["delay_trace"] = delay_trace
     actions.append(copy.deepcopy(action))
