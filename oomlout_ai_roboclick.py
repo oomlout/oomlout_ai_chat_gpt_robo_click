@@ -534,12 +534,15 @@ def corel_close_file(**kwargs):
 def corel_export(**kwargs):
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
+    delay_export = action.get("delay", 10)
+    action.pop("delay", None)   
     if file_name == "":
         file_name = action.get("file_destination", "")
     file_type = action.get("file_type", "pdf")
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     kwargs2["file_type"] = file_type
+    kwargs2["delay"] = delay_export
     robo.robo_corel_export_file(**kwargs2)
 
 def corel_import(**kwargs):
@@ -661,7 +664,8 @@ def corel_trace_full(**kwargs):
     file_destination_just_file_and_extension = os.path.basename(file_destination)
     file_destination_just_file_and_extension_pdf = file_destination_just_file_and_extension.replace(".cdr", ".pdf").replace(".png", ".pdf").replace(".jpg", ".pdf").replace(".jpeg", ".pdf")
     file_destination_just_file_and_extension_png = file_destination_just_file_and_extension.replace(".cdr", ".png").replace(".pdf", ".png").replace(".jpg", ".png").replace(".jpeg", ".png")
-    
+    delay_trace = action.get("delay_trace", 30)
+    delay_png = action.get("delay_png", 10)
     max_dimension = action.get("max_dimension", 100)
     xx = action.get("x", 100)
     yy = action.get("y", 100)
@@ -717,7 +721,8 @@ def corel_trace_full(**kwargs):
         action["remove_background_color_from_entire_image"] = action_main["remove_background_color_from_entire_image"]
     if "detail_minus" in action_main:
         action["detail_minus"] = action_main["detail_minus"]
-
+    if "delay_trace" in action_main:
+        action["delay_trace"] = delay_trace
     actions.append(copy.deepcopy(action))
 
     #corel_set_size
@@ -743,6 +748,7 @@ def corel_trace_full(**kwargs):
     action["command"] = "corel_export"                
     action["file_name"] = f"{file_destination_just_file_and_extension_pdf}"
     action["file_type"] = "pdf"
+    action["delay"] = delay_png
     actions.append(copy.deepcopy(action))
 
     #export png
@@ -750,6 +756,7 @@ def corel_trace_full(**kwargs):
     action["command"] = "corel_export"
     action["file_name"] = f"{file_destination_just_file_and_extension_png}"
     action["file_type"] = "png"
+    action["delay"] = delay_png
     actions.append(copy.deepcopy(action))
 
     #corel close
@@ -770,13 +777,16 @@ def corel_trace(**kwargs):
     remove_background_color_from_entire_image = action.get("remove_background_color_from_entire_image", False)
     kwargs2["remove_background_color_from_entire_image"] = remove_background_color_from_entire_image    
     number_of_colors = action.get("number_of_colors", None)
+    delay_trace = action.get("delay_trace", None)
     if number_of_colors is not None:
         kwargs2["number_of_colors"] = number_of_colors
     detail_minus = action.get("detail_minus", None)
     if detail_minus is not None:
         kwargs2["detail_minus"] = detail_minus
     
-    
+    delay_trace = action.get("delay_trace", 30)
+    kwargs2["delay_trace"] = delay_trace
+
     robo.robo_corel_trace(**kwargs2)
     pass
             
