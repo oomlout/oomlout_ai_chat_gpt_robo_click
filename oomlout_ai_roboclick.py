@@ -724,6 +724,10 @@ def corel_trace_full(**kwargs):
         action["detail_minus"] = detail_minus
     if "delay_trace" in action_main:
         action["delay_trace"] = delay_trace
+    if "smoothing" in action_main:
+        action["smoothing"] = action_main["smoothing"]
+    if "corner_smoothness" in action_main:
+        action["corner_smoothness"] = action_main["corner_smoothness"]
     actions.append(copy.deepcopy(action))
 
     #corel_set_size
@@ -777,13 +781,21 @@ def corel_trace(**kwargs):
     kwargs2["file_name"] = file_name
     remove_background_color_from_entire_image = action.get("remove_background_color_from_entire_image", False)
     kwargs2["remove_background_color_from_entire_image"] = remove_background_color_from_entire_image    
-    number_of_colors = action.get("number_of_colors", None)
+    
     delay_trace = action.get("delay_trace", None)
+    number_of_colors = action.get("number_of_colors", None)
     if number_of_colors is not None:
         kwargs2["number_of_colors"] = number_of_colors
     detail_minus = action.get("detail_minus", None)
     if detail_minus is not None:
         kwargs2["detail_minus"] = detail_minus
+    smoothing = action.get("smoothing", None)
+    if smoothing is not None:
+        kwargs2["smoothing"] = smoothing
+    corner_smoothness = action.get("corner_smoothness", None)
+    if corner_smoothness is not None:
+        kwargs2["corner_smoothness"] = corner_smoothness
+    
     
     delay_trace = action.get("delay_trace", 30)
     kwargs2["delay_trace"] = delay_trace
