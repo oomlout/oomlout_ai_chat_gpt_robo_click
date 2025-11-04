@@ -102,6 +102,8 @@ def main(**kwargs):
                         print(f"Workings file {file_action} not found.")
                     except yaml.YAMLError as e:
                         print(f"Error parsing YAML file {file_action}: {e}")
+                    except Exception as e:
+                        print(f"Error loading workings from {file_action}: {e}")
 
                     print(f"running file_action: {file_action}")
                     kwargs["file_action"] = file_action
