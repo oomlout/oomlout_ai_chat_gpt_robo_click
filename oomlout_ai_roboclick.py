@@ -941,7 +941,8 @@ def query(**kwargs):
     
 def save_image_generated(**kwargs):
     #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
-    kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
+    #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
+    kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
     robo.robo_delay(delay=300)
     #random extra between 300 and 900 seconds
     
@@ -953,7 +954,8 @@ def save_image_generated(**kwargs):
         robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
         #click on the image to focus
         #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
-        robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
+        #robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
+        robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
         robo.robo_keyboard_press_down(delay=1, repeat=40)  # Press down ten times to select the file input
         save_image(**kwargs)
         file_name = kwargs.get("action", {}).get("file_name", "working.png")
@@ -1030,7 +1032,8 @@ def save_image_search_result(**kwargs):
 
 def save_image(**kwargs):
     #position_click = kwargs.get("position_click", [960, 500])
-    position_click = kwargs.get("position_click", [960, 360])
+    #position_click = kwargs.get("position_click", [960, 360])
+    position_click = kwargs.get("position_click", [960, 280])
     
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "working.png")   
