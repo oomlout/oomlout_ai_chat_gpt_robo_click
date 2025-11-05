@@ -935,11 +935,74 @@ def query(**kwargs):
     action = kwargs.get("action", {})
     delay = action.get("delay", 60)
     query_text = action.get("text", "")
+    
+    #clear text box
+    if True:
+        print("    Clearing text box before query...")
+        #select all
+        robo.robo_keyboard_press_ctrl_generic(string="a", delay=2)
+        #back space
+        robo.robo_keyboard_press_backspace(delay=2, repeat=1)
     robo.robo_keyboard_send(string=query_text, delay=5)
     print(f"Querying with text: {query_text}")
+    
     robo.robo_keyboard_press_enter(delay=delay)
     
 def save_image_generated(**kwargs):
+    #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
+    #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
+    kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
+    robo.robo_delay(delay=300)
+    #random extra between 300 and 900 seconds
+    
+    if True:
+        delay = random.randint(300, 900)
+        robo.robo_delay(delay=delay)  # Wait for the image to be generated
+        #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
+        #click on the image to focus
+        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
+        #click on the image to focus
+        #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
+        #robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
+        robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
+        #find image
+        if True:
+            print("Checking for image readiness by pixel color...")
+            running = True
+            while running:                
+                position_check = kwargs.get("position_click", [960, 280])
+                #press down once
+                robo.robo_keyboard_press_down(delay=0.25, repeat=1)
+                #check the colour of the position using pyautogui
+                import pyautogui
+                pixel_color = pyautogui.screenshot().getpixel((position_check[0], position_check[1]))
+                print(f"Pixel color at {position_check}: {pixel_color}")
+                text_colors = [(255, 255, 255), (0, 0, 0)]
+                for i in range(256):
+                    text_colors.append((i, i, i))
+                if pixel_color not in text_colors:
+                    print("    Image appears to be ready based on pixel color.")
+                    #press down once
+                    robo.robo_keyboard_press_down(delay=0.25, repeat=1)  # Press down once to select the file input
+                    #text color again
+                    pixel_color = pyautogui.screenshot().getpixel((position_check[0], position_check[1]))
+                    print("    checking again after pressing down...")
+                    print(f"    Pixel color after down at {position_check}: {pixel_color}")
+                    if pixel_color not in text_colors:
+                        print("        Image confirmed ready after second check.")
+                        running = False
+
+        
+        save_image(**kwargs)
+        file_name = kwargs.get("action", {}).get("file_name", "working.png")
+        file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
+        if os.path.exists(file_name_absolute):
+            print(f"Image saved as {file_name_absolute}")
+            saved = True
+        else:
+            print(f"Image not saved")
+            
+def save_image_generated_old_press_down_40_time_approach(**kwargs):
     #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
     #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
     kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
@@ -965,7 +1028,6 @@ def save_image_generated(**kwargs):
             saved = True
         else:
             print(f"Image not saved")
-            
 
 def save_image_generated_old_try_to_multi_try_doesnt_work(**kwargs):
     kwargs["position_click"] = [960, 400]  # Default position for clicking the image    
