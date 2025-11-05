@@ -969,7 +969,21 @@ def save_image_generated(**kwargs):
         if True:
             print("Checking for image readiness by pixel color...")
             running = True
-            while running:                
+            count_trys = 0
+            count = 0
+            count_max = 50
+            count_trys_max = 3
+            while running:
+                if count >= count_max:
+                    print("    Image not ready after maximum checks.")
+                    #type yep then enter and reset count
+                    robo.robo_keyboard_send(string="yep", delay=2)
+                    robo.robo_keyboard_press_enter(delay=380)
+                    count = 0
+                    count_trys += 1
+                    if count_trys >= count_trys_max:
+                        print("    Image not ready after maximum tries.")
+                        break
                 position_check = kwargs.get("position_click", [960, 280])
                 #press down once
                 robo.robo_keyboard_press_down(delay=0.25, repeat=1)
@@ -982,6 +996,8 @@ def save_image_generated(**kwargs):
                     text_colors.append((i, i, i))
                 if pixel_color not in text_colors:
                     print("    Image appears to be ready based on pixel color.")
+                    #delay 2
+                    robo.robo_delay(delay=2)
                     #press down once
                     robo.robo_keyboard_press_down(delay=0.25, repeat=1)  # Press down once to select the file input
                     #text color again
@@ -990,6 +1006,8 @@ def save_image_generated(**kwargs):
                     print(f"    Pixel color after down at {position_check}: {pixel_color}")
                     if pixel_color not in text_colors:
                         print("        Image confirmed ready after second check.")
+                        #delay 2
+                        robo.robo_delay(delay=2)
                         running = False
 
         
