@@ -200,7 +200,20 @@ def run_single(**kwargs):
         if result == "exit" or result == "exit_no_tab":
             print("Exiting due to 'exit' command.")
             break
-
+        #if result is a dict
+        elif isinstance(result, dict):
+            for key, value in result.items():
+                workings[key] = value
+            #write kwargs to file_action
+            try:
+                with open(file_action, 'w') as file:
+                    yaml.dump(workings, file)
+                    print(f"Updated workings saved to {file_action}")
+            except Exception as e:
+                print(f"Error saving workings to {file_action}: {e}")
+                import time
+                time.sleep(5)
+            
     
     
 def run_action(**kwargs):    
@@ -276,7 +289,12 @@ def run_action(**kwargs):
         image_upscale(**kwargs)
     elif command == "new_chat":
         kwargs
-        new_chat(**kwargs)
+        result = new_chat(**kwargs)
+        new_result = {}
+        new_result["url_chat"] = result
+        result = new_result
+    elif command == "continue_chat":
+        result = continue_chat(**kwargs)    
     elif command == "query":
         query(**kwargs)
     elif command == "save_image_generated":
@@ -862,6 +880,8 @@ def image_upscale(**kwargs):
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
     upscale_factor = action.get("upscale_factor", 2)
+    #make upscale factor an int
+    upscale_factor = int(upscale_factor)
     #if file_input is a file
     if os.path.isfile(file_input):
         #use pil; LANCZOS to upscale the image
@@ -926,7 +946,39 @@ def new_chat(**kwargs):
             url_data.append(url)
             with open(url_file, 'w') as file:
                 yaml.dump(url_data, file)
+            return url
 
+def continue_chat(**kwargs):
+    action = kwargs.get("action", {})    
+    log_url = kwargs.get("log_url", True)
+    url_chat = action.get("url_chat", "")
+    print("continue_chat -- continuing an existing chat")
+    robo.robo_chrome_open_url(url=url_chat, delay=15, message="    opening a new chat")    
+    #if log_url is True:
+    if log_url:
+        #press ctrl l
+        robo.robo_keyboard_press_ctrl_generic(string="l", delay=2)
+        #copy the url
+        url = robo.robo_keyboard_copy(delay=2)
+        #print the url
+        print(f"    New chat URL: {url}")
+        #press esc
+        robo.robo_keyboard_press_escape(delay=2, repeat=5)
+        #save to url.yaml
+        if True:            
+            url_file = os.path.join(kwargs.get("directory_absolute", ""), "url.yaml")
+            #if url exists load it to add to the list
+            if os.path.exists(url_file):
+                with open(url_file, 'r') as file:
+                    url_data = yaml.safe_load(file)
+            else:
+                url_data = []
+            if url_data == None:
+                url_data = []
+            url_data.append(url)
+            with open(url_file, 'w') as file:
+                yaml.dump(url_data, file)
+            return url
 
 def query(**kwargs):
     action = kwargs.get("action", {})
@@ -943,7 +995,14 @@ def query(**kwargs):
         robo.robo_keyboard_press_ctrl_generic(string="a", delay=2)
         #back space
         robo.robo_keyboard_press_backspace(delay=2, repeat=1)
-    robo.robo_keyboard_send(string=query_text, delay=5)
+    #split the text on line breaks
+    query_text = query_text.replace("\r\n", "\n").replace("\r", "\n")
+    query_text_lines = query_text.split("\n")
+    for line in query_text_lines:
+        #send each line with a delay of 1 second between lines
+        robo.robo_keyboard_send(string=line, delay=0.1)
+        robo.robo_keyboard_press_shift_enter(delay=0.1)  # Press Shift+Enter to create a new line
+    
     print(f"Querying with text: {query_text}")
     
     robo.robo_keyboard_press_enter(delay=delay)
@@ -1190,6 +1249,33 @@ def wait_for_file(**kwargs):
                 
 
     return return_value
+
+def get_directory(part):
+    
+    #type, size, color, description_main, description_extra
+    tags = ["classification","type", "size", "color", "description_main", "description_extra", "manufacturer", "part_number"]
+
+    directory = ""
+
+    for tag in tags:
+        if tag in part:
+            if part[tag] != "":
+                if directory != "":
+                    directory += "_"
+                directory += part[tag]
+    #make lowercase and replace spaces with underscores and slashes with underscores
+    directory = directory.replace(" ", "_")
+    directory = directory.replace("/", "_")
+    directory = directory.replace("\\", "_")
+    directory = directory.replace("__", "_")
+    directory = directory.replace(")", "_")
+    directory = directory.replace("(", "_")
+    directory = directory.lower()
+
+    directory = f"parts\\{directory}"
+
+    return directory
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='My CLI tool')
