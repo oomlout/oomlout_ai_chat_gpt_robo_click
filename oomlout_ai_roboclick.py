@@ -5,6 +5,7 @@ import robo
 import copy
 import sys
 import os
+import pyautogui
 
 def main(**kwargs):
     mode = kwargs.get("mode", "")
@@ -1115,9 +1116,13 @@ def query(**kwargs):
     robo.robo_keyboard_press_enter(delay=delay)
     
 def save_image_generated(**kwargs):
+    return save_image_generated_old_press_down_40_time_approach(**kwargs)
+
+def save_image_generated_old_1(**kwargs):
     #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
     #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
     kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
+    position_click = kwargs.get("position_click", [960, 280])
     robo.robo_delay(delay=300)
     #random extra between 300 and 900 seconds
     
@@ -1132,34 +1137,72 @@ def save_image_generated(**kwargs):
         #robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
         robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
         #find image
+        text_colors = [(255, 255, 255), (0, 0, 0)]
+        for i in range(256):
+            text_colors.append((i, i, i))
         if True:
+            #press down 9 times first
+            robo.robo_keyboard_press_down(delay=0.25, repeat=9)
             print("Checking for image readiness by pixel color...")
             running = True
             count_trys = 0
             count = 0
             count_max = 50
-            count_trys_max = 3
+            count_trys_max = 4
             while running:
                 if count >= count_max:
-                    print("    Image not ready after maximum checks.")
-                    #type yep then enter and reset count
-                    robo.robo_keyboard_send(string="yep", delay=2)
+                    if count == 1:
+                        #add 30 piels to y to the check point each time until it reaches 800 in case the image can't be found with keypresses
+                        position_start = copy.deepcopy(position_click)
+                        y_current = position_start[1]
+                        count_2 = 0
+                        while y_current < 800:
+                            y_current = y_current + 30 * count_2
+                            count_2 += 1 
+                            position_check_2 = [position_start[0], y_current]
+                            pixel_color = pyautogui.screenshot().getpixel((position_check_2[0], position_check_2[1]))
+                            print(f"Pixel color at {position_check_2}: {pixel_color} count: {count}   ")
+
+                            if pixel_color not in text_colors:
+                                position_check_2 = [position_start[0], y_current+30]
+                                print("    Image appears to be ready based on pixel color.")
+                                #delay 2
+                                robo.robo_delay(delay=2)
+                                #press down once
+                                robo.robo_keyboard_press_down(delay=0.25, repeat=1)  # Press down once to select the file input
+                                #text color again
+                                pixel_color = pyautogui.screenshot().getpixel((position_check_2[0], position_check_2[1]))
+                                print("    checking again after pressing down...")
+                                print(f"    Pixel color after down at {position_check_2}: {pixel_color}")
+                                if pixel_color not in text_colors:
+                                    print("        Image confirmed ready after second check.")
+                                    #delay 2
+                                    robo.robo_delay(delay=2)
+                                    running = False
+                if True:
+                
+                    print("    Maximum checks reached first time, press up...")
+                    #press up 5 times to reset position
+                    robo.robo_keyboard_press_up(delay=0.25, repeat=5)
+
+                #type yep then enter and reset count
+                
+                if count > 1:
+                    robo.robo_keyboard_send(string="yep the first one", delay=2)
                     robo.robo_keyboard_press_enter(delay=380)
-                    count = 0
-                    count_trys += 1
-                    if count_trys >= count_trys_max:
-                        print("    Image not ready after maximum tries.")
-                        break
+                count = 0
+                count_trys += 1
+                if count_trys >= count_trys_max:
+                    print("    Image not ready after maximum tries.")
+                    break
                 position_check = kwargs.get("position_click", [960, 280])
                 #press down once
                 robo.robo_keyboard_press_down(delay=0.25, repeat=1)
                 #check the colour of the position using pyautogui
                 import pyautogui
                 pixel_color = pyautogui.screenshot().getpixel((position_check[0], position_check[1]))
-                print(f"Pixel color at {position_check}: {pixel_color}")
-                text_colors = [(255, 255, 255), (0, 0, 0)]
-                for i in range(256):
-                    text_colors.append((i, i, i))
+                print(f"Pixel color at {position_check}: {pixel_color} count: {count}   ")
+                
                 if pixel_color not in text_colors:
                     print("    Image appears to be ready based on pixel color.")
                     #delay 2
@@ -1175,6 +1218,7 @@ def save_image_generated(**kwargs):
                         #delay 2
                         robo.robo_delay(delay=2)
                         running = False
+                count += 1
 
         
         save_image(**kwargs)
