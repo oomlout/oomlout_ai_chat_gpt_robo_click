@@ -883,6 +883,7 @@ def image_crop(**kwargs):
         file_output = os.path.join(directory, file_output)
     crop = action.get("crop", "a4_portrait")  #left, upper, right, lower
     #if file_input is a file
+    print(f"Cropping image {file_input} to {crop} and saving to {file_output}")
     if os.path.isfile(file_input):
         #use pil to crop the image
         from PIL import Image
@@ -971,6 +972,7 @@ def image_upscale(**kwargs):
     #png or jpeg or jpg
     file_output_default = file_input.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
     file_output = action.get("file_output", file_output_default)
+    file_output_base = file_output
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
     upscale_factor = action.get("upscale_factor", 2)
@@ -1001,10 +1003,11 @@ def image_upscale(**kwargs):
             return
         if crop != "":
             #crop the image
+            print(f"Cropping upscaled image {file_output} to {crop}")
             kwargs2 = copy.deepcopy(kwargs)
             action2 = {}
-            action2["file_input"] = file_output
-            action2["file_output"] = file_output
+            action2["file_input"] = file_output_base
+            action2["file_output"] = file_output_base
             action2["crop"] = crop
             kwargs2["action"] = action2
             image_crop(**kwargs2)
