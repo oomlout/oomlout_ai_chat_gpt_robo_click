@@ -284,6 +284,9 @@ def run_action(**kwargs):
     elif command == "file_copy":
         result = file_copy(**kwargs)
     #image commands
+    #image_crop
+    elif command == "image_crop":
+        image_crop(**kwargs)
     #image_upscale
     elif command == "image_upscale":
         image_upscale(**kwargs)
@@ -867,6 +870,97 @@ def ai_set_mode(**kwargs):
         robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
         print("     AI mode set to deep research")
 
+#image_crop
+def image_crop(**kwargs):
+    action = kwargs.get("action", {})
+    directory = kwargs.get("directory", "")
+    file_input = action.get("file_input", "")
+    file_input = os.path.join(directory, file_input)
+    file_input_full = os.path.abspath(file_input)
+    file_output_default = file_input_full
+    file_output = action.get("file_output", file_output_default)
+    if directory not in file_output:
+        file_output = os.path.join(directory, file_output)
+    crop = action.get("crop", "a4_portrait")  #left, upper, right, lower
+    #if file_input is a file
+    if os.path.isfile(file_input):
+        #use pil to crop the image
+        from PIL import Image
+        try:
+            with Image.open(file_input_full) as img:
+                # Crop the image
+                crop_box = [0,0,100,100]
+                if crop == "a4_landscape":
+                    img_width, img_height = img.size
+                    aspect_ratio = 297 / 210  
+                    # create_coordinates to take from the middle of the image check if source is wider or taller than aspect ratio
+                    if img_width / img_height > aspect_ratio:
+                        #source is wider
+                        new_height = img_height
+                        new_width = int(new_height * aspect_ratio)
+                        left = (img_width - new_width) / 2
+                        upper = 0
+                        right = left + new_width
+                        lower = img_height
+                    else:
+                        #source is taller
+                        new_width = img_width
+                        new_height = int(new_width / aspect_ratio)
+                        left = 0
+                        upper = (img_height - new_height) / 2
+                        right = img_width
+                        lower = upper + new_height
+                    crop_box = [left, upper, right, lower]
+                elif crop == "a4_portrait":
+                    img_width, img_height = img.size
+                    aspect_ratio = 210 / 297  
+                    # create_coordinates to take from the middle of the image check if source is wider or taller than aspect ratio
+                    if img_width / img_height > aspect_ratio:
+                        #source is wider
+                        new_height = img_height
+                        new_width = int(new_height * aspect_ratio)
+                        left = (img_width - new_width) / 2
+                        upper = 0
+                        right = left + new_width
+                        lower = img_height
+                    else:
+                        #source is taller
+                        new_width = img_width
+                        new_height = int(new_width / aspect_ratio)
+                        left = 0
+                        upper = (img_height - new_height) / 2
+                        right = img_width
+                        lower = upper + new_height
+                    crop_box = [left, upper, right, lower]
+                elif crop == "square":
+                    img_width, img_height = img.size
+                    # create_coordinates to take from the middle of the image
+                    if img_width > img_height:
+                        #source is wider
+                        new_size = img_height
+                        left = (img_width - new_size) / 2
+                        upper = 0
+                        right = left + new_size
+                        lower = img_height
+                    else:
+                        #source is taller
+                        new_size = img_width
+                        left = 0
+                        upper = (img_height - new_size) / 2
+                        right = img_width
+                        lower = upper + new_size
+                    crop_box = [left, upper, right, lower]
+                img_cropped = img.crop((crop_box[0], crop_box[1], crop_box[2], crop_box[3]))
+                # Save the cropped image
+                img_cropped.save(file_output)
+                print(f"Image cropped and saved to {file_output}")
+        except Exception as e:
+            print(f"Error cropping image {file_input_full}: {e}")
+            return
+    else:
+        print(f"file_input {file_input} does not exist, skipping image crop")
+        return
+
 #image commands
 def image_upscale(**kwargs):
     action = kwargs.get("action", {})
@@ -883,6 +977,7 @@ def image_upscale(**kwargs):
     #make upscale factor an int
     upscale_factor = int(upscale_factor)
     #if file_input is a file
+    crop = action.get("crop", "")  #left, upper, right, lower
     if os.path.isfile(file_input):
         #use pil; LANCZOS to upscale the image
         from PIL import Image
@@ -904,6 +999,15 @@ def image_upscale(**kwargs):
         except Exception as e:
             print(f"Error upscaling image {file_input_full}: {e}")
             return
+        if crop != "":
+            #crop the image
+            kwargs2 = copy.deepcopy(kwargs)
+            action2 = {}
+            action2["file_input"] = file_output
+            action2["file_output"] = file_output
+            action2["crop"] = crop
+            kwargs2["action"] = action2
+            image_crop(**kwargs2)
     else:
         print(f"file_input {file_input} does not exist, skipping image upscale")
         return
