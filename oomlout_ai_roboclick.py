@@ -250,7 +250,10 @@ def run_action(**kwargs):
     elif command == "corel_add_text_box":
         corel_add_text_box(**kwargs)    
     elif command == "corel_close_file":
-        corel_close_file(**kwargs)        
+        corel_close_file(**kwargs)   
+    #corel_group
+    elif command == "corel_group":
+        corel_group(**kwargs)     
     elif command == "corel_import":
         corel_import(**kwargs)
     elif command == "corel_open":        
@@ -272,7 +275,11 @@ def run_action(**kwargs):
         corel_set_size(**kwargs)
     elif command == "corel_set_position":
         corel_set_position(**kwargs)
+    #set_rotation
+    elif command == "corel_set_rotation":
+        corel_set_rotation(**kwargs)
     elif command == "corel_copy":
+        
         corel_copy(**kwargs)
     elif command == "corel_paste":
         robo.robo_corel_paste(**kwargs)
@@ -569,6 +576,11 @@ def corel_export(**kwargs):
     kwargs2["delay"] = delay_export
     robo.robo_corel_export_file(**kwargs2)
 
+def corel_group(**kwargs):
+    print("corel_group -- grouping selected items in corel")
+    #group selected items in corel
+    robo.robo_corel_group(**kwargs)
+
 def corel_import(**kwargs):
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "")
@@ -579,7 +591,7 @@ def corel_import(**kwargs):
     width = action.get("width", "")
     height = action.get("height", "")
     max_dimension = action.get("max_dimension", "")
-
+    angle = action.get("angle", 0)
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     if x != "":
@@ -592,6 +604,8 @@ def corel_import(**kwargs):
         kwargs2["height"] = height
     if max_dimension != "":
         kwargs2["max_dimension"] = max_dimension
+    if angle != 0:
+        kwargs2["angle"] = angle
 
     robo.robo_corel_import_file(**kwargs2)
 
@@ -661,6 +675,16 @@ def corel_set_position(**kwargs):
     kwargs2["x"] = x
     kwargs2["y"] = y
     robo.robo_corel_set_position(**kwargs2)
+
+#corel set rotation
+def corel_set_rotation(**kwargs):
+    print("corel_set_rotation -- setting rotation")
+    action = kwargs.get("action", {})
+    angle = action.get("angle", 0)
+    
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["angle"] = angle
+    robo.robo_corel_set_rotation(**kwargs2)
 
 def corel_set_size(**kwargs):
     print("corel_set_size -- setting size")
