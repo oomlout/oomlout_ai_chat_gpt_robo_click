@@ -1,5 +1,6 @@
 import random
 import argparse
+from statistics import mode
 import yaml
 import robo
 import copy
@@ -1119,7 +1120,9 @@ def query(**kwargs):
     action = kwargs.get("action", {})
     delay = action.get("delay", 60)
     query_text = action.get("text", "")
-    
+    mode_ai = action.get("mode_ai_wait", "slow")
+
+
     #clear text box
     if True:
         print("    Clearing text box before query...")
@@ -1137,8 +1140,38 @@ def query(**kwargs):
     
     print(f"Querying with text: {query_text}")
     
-    robo.robo_keyboard_press_enter(delay=delay)
-    
+    if mode_ai =="slow":
+        robo.robo_keyboard_press_enter(delay=delay)
+    elif mode_ai == "fast":
+        robo.robo_keyboard_press_enter(delay=1)
+        ai_wait_mode_fast_check()
+        
+
+def ai_wait_mode_fast_check():  
+    print("Waiting for AI to finish responding (fast mode)...")
+    count = 0
+    count_max = 100
+    running = True    
+    point_check_color = [1445,964]
+    color_done= (0, 0, 0)
+    color_expecting = (236,236,236)
+
+    while running and count < count_max:
+        robo.robo_delay(delay=10)
+        pixel_color = pyautogui.screenshot().getpixel((point_check_color[0], point_check_color[1]))
+        print(f"    Pixel color at {point_check_color}: {pixel_color} ")
+        #check if it is the expected color
+        if pixel_color == color_expecting:
+            print("    Good news the right color was found")
+        else:
+            print("    The expected color was not found, may need to move")
+        if pixel_color == color_done:
+            print("    AI apIpears to have finished responding.")
+            running = False
+            robo.robo_delay(delay=2)
+        
+        
+
 def save_image_generated(**kwargs):
     return save_image_generated_old_press_down_40_time_approach(**kwargs)
 
@@ -1255,15 +1288,21 @@ def save_image_generated_old_1(**kwargs):
             print(f"Image not saved")
             
 def save_image_generated_old_press_down_40_time_approach(**kwargs):
+    action = kwargs.get("action", {})
+    mode_ai_wait = action.get("mode_ai_wait", "slow")
+    
     #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
     #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
     kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
-    robo.robo_delay(delay=300)
-    #random extra between 300 and 900 seconds
     
-    if True:
+    if mode_ai_wait == "slow":
+        robo.robo_delay(delay=300)
         delay = random.randint(300, 900)
         robo.robo_delay(delay=delay)  # Wait for the image to be generated
+    elif mode_ai_wait == "fast":
+        ai_wait_mode_fast_check()
+    
+    if True:
         #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
         #click on the image to focus
         robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
