@@ -1060,8 +1060,8 @@ def new_chat(**kwargs):
     #type in start query
     start_query = ""
     if description != "":        
-        #start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
-        start_query += f" Hi, Chadikins I hope your day is going well! lets get to this!. I like it when you are chatty and suggest things based on what i've done in the past. Also use your thinking, and any other, public and secret abilities to their utmost throughout this task please. When you generate an image just deliver the image no extra text. "
+        start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
+        #start_query += f" Hi, Chadikins I hope your day is going well! lets get to this!. I like it when you are chatty and suggest things based on what i've done in the past. Also use your thinking, and any other, public and secret abilities to their utmost throughout this task please. When you generate an image just deliver the image no extra text. "
     start_query += ""
     robo.robo_keyboard_send(string=start_query, delay=5)
     robo.robo_keyboard_press_enter(delay=40)
@@ -1152,12 +1152,37 @@ def query(**kwargs):
     
     if mode_ai =="slow":
         robo.robo_keyboard_press_enter(delay=delay)
-    elif mode_ai == "fast":
+    elif "fast" in mode_ai: 
         robo.robo_keyboard_press_enter(delay=1)
-        ai_wait_mode_fast_check()
+        ai_wait_mode_fast_check(mode_ai_wait=mode_ai)
         
 
-def ai_wait_mode_fast_check():  
+def ai_wait_mode_fast_check(mode_ai_wait="fast_button_state"):  
+    if mode_ai_wait == "fast_button_state" or mode_ai_wait == "fast":
+        return ai_wait_mode_fast_check_state_of_submit_button_approach()
+    elif mode_ai_wait == "fast_clipboard_state":
+        return ai_wait_mode_fast_clipboard_creating_image_approach()
+
+def ai_wait_mode_fast_clipboard_creating_image_approach():  
+    print("Waiting for AI to finish responding (fast mode)...")
+    count = 0
+    count_max = 100
+    running = True    
+    string_check = "Creating image"
+
+    while running and count < count_max:
+        robo.robo_delay(delay=10)
+        #mouse click at 300,300
+        robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
+        text = robo.robo_keyboard_copy(delay=2)
+        if string_check in text:
+            print("    AI appears to be creating an image, waiting for it to finish...")
+        else:
+            print("    AI appears to have finished responding.")
+            running = False
+            robo.robo_delay(delay=2)
+
+def ai_wait_mode_fast_check_state_of_submit_button_approach():  
     print("Waiting for AI to finish responding (fast mode)...")
     count = 0
     count_max = 100
@@ -1302,14 +1327,14 @@ def save_image_generated_old_press_down_40_time_approach(**kwargs):
     mode_ai_wait = action.get("mode_ai_wait", "slow")
     
     #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
-    #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
-    kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
+    kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
+    #kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
     
     if mode_ai_wait == "slow":
         robo.robo_delay(delay=300)
         delay = random.randint(300, 900)
         robo.robo_delay(delay=delay)  # Wait for the image to be generated
-    elif mode_ai_wait == "fast":
+    elif "fast" in mode_ai_wait:
         ai_wait_mode_fast_check()
     
     if True:
@@ -1318,8 +1343,8 @@ def save_image_generated_old_press_down_40_time_approach(**kwargs):
         robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
         #click on the image to focus
         #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
-        #robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
-        robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
+        robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
+        #robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
         robo.robo_keyboard_press_down(delay=1, repeat=40)  # Press down ten times to select the file input
         save_image(**kwargs)
         file_name = kwargs.get("action", {}).get("file_name", "working.png")
