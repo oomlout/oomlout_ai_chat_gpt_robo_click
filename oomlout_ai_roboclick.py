@@ -252,6 +252,9 @@ def run_action(**kwargs):
         corel_add_text_box(**kwargs)    
     elif command == "corel_close_file":
         corel_close_file(**kwargs)   
+    #corel_convert_to_curves
+    elif command == "corel_convert_to_curves":
+        corel_convert_to_curves(**kwargs)
     #corel_group
     elif command == "corel_group":
         corel_group(**kwargs)     
@@ -279,8 +282,7 @@ def run_action(**kwargs):
     #set_rotation
     elif command == "corel_set_rotation":
         corel_set_rotation(**kwargs)
-    elif command == "corel_copy":
-        
+    elif command == "corel_copy":        
         corel_copy(**kwargs)
     elif command == "corel_paste":
         robo.robo_corel_paste(**kwargs)
@@ -562,6 +564,14 @@ def corel_close_file(**kwargs):
     print("corel_close_file -- closing corel")
     #close corel
     robo.robo_corel_close_file(**kwargs)
+
+def corel_convert_to_curves(**kwargs):
+    print("corel_convert_to_curves -- converting selected items to curves in corel")
+    action = kwargs.get("action", {})
+    delay_convert = action.get("delay", 5)
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["delay"] = delay_convert
+    robo.robo_corel_convert_to_curves(**kwargs2)
 
 def corel_export(**kwargs):
     action = kwargs.get("action", {})
