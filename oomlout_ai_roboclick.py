@@ -301,6 +301,9 @@ def run_action(**kwargs):
     #image_upscale
     elif command == "image_upscale":
         image_upscale(**kwargs)
+    #image quad shift
+    elif command == "image_quad_swap_for_tile":
+        image_quad_swap_for_tile(**kwargs)
     elif command == "new_chat":
         kwargs
         result = new_chat(**kwargs)
@@ -996,6 +999,51 @@ def image_crop(**kwargs):
             return
     else:
         print(f"file_input {file_input} does not exist, skipping image crop")
+        return
+
+def image_quad_swap_for_tile(**kwargs):
+    action = kwargs.get("action", {})
+    directory = kwargs.get("directory", "")
+    file_input = action.get("file_input", "")
+    file_input = os.path.join(directory, file_input)
+    file_input_full = os.path.abspath(file_input)
+    file_output_default = file_input.replace(".png", "_quadshifted.png").replace(".jpg", "_quadshifted.jpg").replace(".jpeg", "_quadshifted.jpeg")
+    file_output = action.get("file_output", file_output_default)
+    if directory not in file_output:
+        file_output = os.path.join(directory, file_output)
+    
+    #if file_input is a file
+    if os.path.isfile(file_input):
+        #use pil to quad shift the image
+        from PIL import Image
+        try:
+            with Image.open(file_input_full) as img:
+                width, height = img.size
+                # Create a new blank image
+                new_img = Image.new("RGB", (width, height))
+                # Define the box coordinates for each quadrant
+                box1 = (0, 0, width // 2, height // 2)  # Top-left
+                box2 = (width // 2, 0, width, height // 2)  # Top-right
+                box3 = (0, height // 2, width // 2, height)  # Bottom-left
+                box4 = (width // 2, height // 2, width, height)  # Bottom-right
+                # Crop the quadrants    
+                quadrant1 = img.crop(box1)
+                quadrant2 = img.crop(box2)
+                quadrant3 = img.crop(box3)
+                quadrant4 = img.crop(box4)
+                # Paste the quadrants into their new positions
+                new_img.paste(quadrant4, box1)  # Bottom-right to Top-left
+                new_img.paste(quadrant3, box2)  # Bottom-left to Top
+                new_img.paste(quadrant2, box3)  # Top-right to Bottom-left
+                new_img.paste(quadrant1, box4)  # Top-left to Bottom-right                
+                # Save the quad shifted image
+                new_img.save(file_output)
+                print(f"Image quad shifted and saved to {file_output}")
+        except Exception as e:
+            print(f"Error quad shifting image {file_input_full}: {e}")
+            return
+    else:
+        print(f"file_input {file_input} does not exist, skipping image quad shift")
         return
 
 #image commands
