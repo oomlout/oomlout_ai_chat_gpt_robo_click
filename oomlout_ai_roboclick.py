@@ -1179,6 +1179,7 @@ def query(**kwargs):
     delay = action.get("delay", 60)
     query_text = action.get("text", "")
     mode_ai = action.get("mode_ai_wait", "slow")
+    method = action.get("method", "typing")  #"standard" or "line_by_line"
 
 
     #clear text box
@@ -1188,13 +1189,21 @@ def query(**kwargs):
         robo.robo_keyboard_press_ctrl_generic(string="a", delay=2)
         #back space
         robo.robo_keyboard_press_backspace(delay=2, repeat=1)
-    #split the text on line breaks
-    query_text = query_text.replace("\r\n", "\n").replace("\r", "\n")
-    query_text_lines = query_text.split("\n")
-    for line in query_text_lines:
-        #send each line with a delay of 1 second between lines
-        robo.robo_keyboard_send(string=line, delay=0.1)
-        robo.robo_keyboard_press_shift_enter(delay=0.1)  # Press Shift+Enter to create a new line
+
+    if method == "typing":
+        #split the text on line breaks
+        query_text = query_text.replace("\r\n", "\n").replace("\r", "\n")
+        query_text_lines = query_text.split("\n")
+        for line in query_text_lines:
+            #send each line with a delay of 1 second between lines
+            robo.robo_keyboard_send(string=line, delay=0.1)
+            robo.robo_keyboard_press_shift_enter(delay=0.1)  # Press Shift+Enter to create a new line
+    elif method == "paste":
+        #press space twice to ensure focus
+        robo.robo_keyboard_send(string="  ")
+        robo.robo_keyboard_paste(text=query_text)
+        #paste the entire text at once
+        robo.robo_keyboard_press_ctrl_generic(string="v", delay=2)
     
     print(f"Querying with text: {query_text}")
     
