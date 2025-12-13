@@ -1508,6 +1508,9 @@ def text_jinja_template(**kwargs):
     kwargs["file_source"] = file_source
     file_output = action.get("file_output", "output.txt")
     kwargs["file_output"] = f"{directory}\\{file_output}"
+    search_and_replace = action.get("search_and_replace", [])
+    if search_and_replace != []:
+        kwargs["search_and_replace"] = search_and_replace
     robo.robo_text_jinja_template(**kwargs)
     convert_to_pdf = action.get("convert_to_pdf", False)
     convert_to_png = action.get("convert_to_png", False)
