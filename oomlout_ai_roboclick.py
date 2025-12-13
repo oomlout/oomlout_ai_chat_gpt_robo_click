@@ -365,7 +365,8 @@ def add_image(**kwargs):
     print("add_image -- adding an image")
     #kwargs["position_click"] = [750,995]
 
-    position_click = kwargs.get("position_click", [738, 982])
+    #position_click = kwargs.get("position_click", [738, 982])
+    position_click = kwargs.get("position_click", [628, 982])
     action = kwargs.get("action", {})
     file_name = action.get("file_name", "working.png")
     directory_absolute = kwargs.get("directory_absolute", "")
