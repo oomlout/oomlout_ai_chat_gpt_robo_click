@@ -1245,7 +1245,8 @@ def ai_wait_mode_fast_check_state_of_submit_button_approach():
     count = 0
     count_max = 100
     running = True    
-    point_check_color = [1445,964]
+    #point_check_color = [1445,964]
+    point_check_color = [1331,964]
     color_done= (0, 0, 0)
     color_expecting = (236,236,236)
 
