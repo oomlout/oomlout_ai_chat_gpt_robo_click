@@ -222,7 +222,9 @@ def run_action(**kwargs):
     result = ""
     action = kwargs.get("action", {})
     command = action.get("command")
-    
+    #add_file
+    if command == "add_file":
+        result = add_file(**kwargs)
     if command == "add_image":
         result = add_image(**kwargs)
     #ai ones
@@ -359,6 +361,9 @@ def add_image_tab_version_doesnt_work_if_rtext_box_not_selected(**kwargs):
     #preess escape 5 times in case of any dialog boxes
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     return return_value
+
+def add_file(**kwargs):
+    return add_image(**kwargs)
 
 def add_image(**kwargs):
     return_value = ""
