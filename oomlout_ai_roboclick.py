@@ -577,10 +577,14 @@ def corel_close_file(**kwargs):
 
 def corel_convert_to_curves(**kwargs):
     print("corel_convert_to_curves -- converting selected items to curves in corel")
+    
     action = kwargs.get("action", {})
+    ungroup = action.get("ungroup", False)
     delay_convert = action.get("delay", 5)
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["delay"] = delay_convert
+    if ungroup:
+        kwargs2["ungroup"] = ungroup
     robo.robo_corel_convert_to_curves(**kwargs2)
 
 def corel_export(**kwargs):
@@ -713,10 +717,12 @@ def corel_set_size(**kwargs):
     width = action.get("width", "")
     height = action.get("height", "")
     max_dimension = action.get("max_dimension", "")
+    select_all = action.get("select_all", False)
     
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["width"] = width
     kwargs2["height"] = height
+    kwargs2["select_all"] = select_all
     if max_dimension != "":
         kwargs2["max_dimension"] = max_dimension
     robo.robo_corel_set_size(**kwargs2)
