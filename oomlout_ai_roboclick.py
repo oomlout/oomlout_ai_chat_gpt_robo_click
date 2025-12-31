@@ -264,6 +264,8 @@ def run_action(**kwargs):
         corel_import(**kwargs)
     elif command == "corel_open":        
         corel_open(**kwargs)
+    elif command == "corel_page_goto":
+        corel_page_goto(**kwargs)
     elif command == "corel_save":
         corel_save(**kwargs)
     elif command == "corel_save_as":
@@ -651,6 +653,14 @@ def corel_open(**kwargs):
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     robo.robo_corel_open(**kwargs2)
+
+def corel_page_goto(**kwargs):
+    print("corel_page_goto -- going to page in corel")
+    action = kwargs.get("action", {})
+    page_number = action.get("page_number", 1)
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["page_number"] = page_number
+    robo.robo_corel_page_goto(**kwargs2)
 
 def corel_paste(**kwargs):
     print("corel_paste -- pasting copied items in corel")
