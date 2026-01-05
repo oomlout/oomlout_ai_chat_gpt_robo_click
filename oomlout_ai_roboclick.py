@@ -619,6 +619,7 @@ def corel_import(**kwargs):
     height = action.get("height", "")
     max_dimension = action.get("max_dimension", "")
     angle = action.get("angle", 0)
+    special = action.get("special", "")
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     if x != "":
@@ -633,6 +634,8 @@ def corel_import(**kwargs):
         kwargs2["max_dimension"] = max_dimension
     if angle != 0:
         kwargs2["angle"] = angle
+    if special != "":
+        kwargs2["special"] = special
 
     robo.robo_corel_import_file(**kwargs2)
 
