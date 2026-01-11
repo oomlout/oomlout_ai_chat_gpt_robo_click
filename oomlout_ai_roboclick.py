@@ -1613,20 +1613,249 @@ def get_directory(part):
     return directory
 
 
+def generate_action_documentation(**kwargs):
+    """
+    Generates documentation for all actions in run_action and saves to YAML
+    """
+    print("Generating action documentation...")
+    
+    documentation = {
+        "actions": []
+    }
+    
+    # Define all actions with their variables
+    actions_info = [
+        {
+            "command": "add_file",
+            "description": "Add a file (alias for add_image)",
+            "variables": ["file_name"]
+        },
+        {
+            "command": "add_image",
+            "description": "Add an image file to the current context",
+            "variables": ["file_name", "position_click"]
+        },
+        {
+            "command": "ai_fix_yaml_copy_paste",
+            "description": "Fix YAML formatting from copy-pasted content",
+            "variables": ["file_input", "file_output", "remove_top_level", "new_item_name", "search_and_replace"]
+        },
+        {
+            "command": "ai_save_image",
+            "description": "Save AI-generated image",
+            "variables": ["file_name", "position_click", "mode_ai_wait"]
+        },
+        {
+            "command": "ai_save_text",
+            "description": "Save text content from AI",
+            "variables": ["file_name_full", "file_name_clip", "clip"]
+        },
+        {
+            "command": "ai_set_mode",
+            "description": "Set AI mode (e.g., deep_research)",
+            "variables": ["mode"]
+        },
+        {
+            "command": "close_tab",
+            "description": "Close the current browser tab",
+            "variables": []
+        },
+        {
+            "command": "convert_svg_to_pdf",
+            "description": "Convert SVG file to PDF format",
+            "variables": ["file_input", "file_output"]
+        },
+        {
+            "command": "corel_add_text",
+            "description": "Add text in CorelDRAW",
+            "variables": ["text", "x", "y", "font", "font_size", "bold", "italic"]
+        },
+        {
+            "command": "corel_add_text_box",
+            "description": "Add text box in CorelDRAW",
+            "variables": ["text", "x", "y", "width", "height", "font", "font_size", "bold", "italic"]
+        },
+        {
+            "command": "corel_close_file",
+            "description": "Close current file in CorelDRAW",
+            "variables": []
+        },
+        {
+            "command": "corel_convert_to_curves",
+            "description": "Convert selected items to curves in CorelDRAW",
+            "variables": ["ungroup", "delay"]
+        },
+        {
+            "command": "corel_copy",
+            "description": "Copy selected items in CorelDRAW",
+            "variables": []
+        },
+        {
+            "command": "corel_export",
+            "description": "Export file from CorelDRAW",
+            "variables": ["file_name", "file_destination", "file_type", "delay"]
+        },
+        {
+            "command": "corel_group",
+            "description": "Group selected items in CorelDRAW",
+            "variables": []
+        },
+        {
+            "command": "corel_import",
+            "description": "Import file into CorelDRAW",
+            "variables": ["file_name", "file_source", "x", "y", "width", "height", "max_dimension", "angle", "special"]
+        },
+        {
+            "command": "corel_object_order",
+            "description": "Change object stacking order in CorelDRAW",
+            "variables": ["order"]
+        },
+        {
+            "command": "corel_open",
+            "description": "Open file in CorelDRAW",
+            "variables": ["file_name", "file_source"]
+        },
+        {
+            "command": "corel_page_goto",
+            "description": "Navigate to specific page in CorelDRAW",
+            "variables": ["page_number"]
+        },
+        {
+            "command": "corel_paste",
+            "description": "Paste copied items in CorelDRAW",
+            "variables": ["x", "y", "width", "height"]
+        },
+        {
+            "command": "corel_save",
+            "description": "Save current file in CorelDRAW",
+            "variables": ["file_name"]
+        },
+        {
+            "command": "corel_save_as",
+            "description": "Save file with new name in CorelDRAW",
+            "variables": ["file_name", "file_destination"]
+        },
+        {
+            "command": "corel_select_all",
+            "description": "Select all objects in CorelDRAW",
+            "variables": []
+        },
+        {
+            "command": "corel_set_position",
+            "description": "Set position of selected items in CorelDRAW",
+            "variables": ["x", "y"]
+        },
+        {
+            "command": "corel_set_rotation",
+            "description": "Set rotation angle of selected items in CorelDRAW",
+            "variables": ["angle"]
+        },
+        {
+            "command": "corel_set_size",
+            "description": "Set size of selected items in CorelDRAW",
+            "variables": ["width", "height", "max_dimension", "select_all"]
+        },
+        {
+            "command": "corel_trace",
+            "description": "Trace bitmap image in CorelDRAW",
+            "variables": ["file_name", "remove_background_color_from_entire_image", "delay_trace", "number_of_colors", "detail_minus", "smoothing", "corner_smoothness"]
+        },
+        {
+            "command": "corel_trace_full",
+            "description": "Complete trace workflow in CorelDRAW",
+            "variables": ["file_source", "file_source_trace", "file_destination", "delay_trace", "delay_png", "max_dimension", "detail_minus", "x", "y", "number_of_colors", "remove_background_color_from_entire_image", "smoothing", "corner_smoothness"]
+        },
+        {
+            "command": "file_copy",
+            "description": "Copy file from source to destination",
+            "variables": ["file_source", "file_destination"]
+        },
+        {
+            "command": "image_crop",
+            "description": "Crop image to specified format",
+            "variables": ["file_input", "file_output", "crop"]
+        },
+        {
+            "command": "image_upscale",
+            "description": "Upscale image resolution",
+            "variables": ["file_input", "file_output", "upscale_factor", "crop"]
+        },
+        {
+            "command": "image_quad_swap_for_tile",
+            "description": "Swap image quadrants for tiling",
+            "variables": ["file_input", "file_output"]
+        },
+        {
+            "command": "new_chat",
+            "description": "Open new chat session",
+            "variables": ["description", "log_url"]
+        },
+        {
+            "command": "continue_chat",
+            "description": "Continue existing chat session",
+            "variables": ["url_chat", "log_url"]
+        },
+        {
+            "command": "query",
+            "description": "Send query to AI",
+            "variables": ["text", "delay", "mode_ai_wait", "method"]
+        },
+        {
+            "command": "save_image_generated",
+            "description": "Save AI-generated image",
+            "variables": ["file_name", "position_click", "mode_ai_wait"]
+        },
+        {
+            "command": "save_image_search_result",
+            "description": "Save image from search results",
+            "variables": ["index", "file_name", "overwrite", "position_click"]
+        },
+        {
+            "command": "text_jinja_template",
+            "description": "Process text using Jinja template",
+            "variables": ["file_template", "file_source", "file_output", "search_and_replace", "convert_to_pdf", "convert_to_png"]
+        },
+        {
+            "command": "wait_for_file",
+            "description": "Wait for file(s) to exist before proceeding",
+            "variables": ["file_name", "file_name_1", "file_name_2", "file_name_3", "file_name_4", "file_name_5", "file_name_6"]
+        }
+    ]
+    
+    documentation["actions"] = actions_info
+    documentation["generated_date"] = "2026-01-11"
+    documentation["total_actions"] = len(actions_info)
+    
+    # Save to YAML file
+    output_dir = kwargs.get("output_dir", "configuration")
+    output_file = os.path.join(output_dir, "action_documentation.yaml")
+    
+    with open(output_file, 'w', encoding='utf-8') as f:
+        yaml.dump(documentation, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+    
+    print(f"Documentation saved to {output_file}")
+    print(f"Total actions documented: {len(actions_info)}")
+    
+    return output_file
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='My CLI tool')
     parser.add_argument('--file_action', '-fa', help='Enable verbose output', default="not_set")
     parser.add_argument('--count', type=int, default=1, help='Number of iterations')
+    parser.add_argument('--generate_docs', action='store_true', help='Generate action documentation')
     args = parser.parse_args()
     
     kwargs = copy.deepcopy(vars(args))
 
-    if kwargs["file_action"] == "not_set":
-        kwargs["file_action"] = "configuration/working.yaml"
-    
-    #print out kwargs
-    print(f"Running with arguments:")
-    for key, value in kwargs.items():
-        print(f"    {key}: {value}")
-    
-    main(**kwargs)
+    if kwargs.get("generate_docs", False):
+        generate_action_documentation(**kwargs)
+    else:
+        if kwargs["file_action"] == "not_set":
+            kwargs["file_action"] = "configuration/working.yaml"
+        
+        #print out kwargs
+        print(f"Running with arguments:")
+        for key, value in kwargs.items():
+            print(f"    {key}: {value}")
+        
+        main(**kwargs)

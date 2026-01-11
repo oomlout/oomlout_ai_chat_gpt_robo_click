@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoboClick Action Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 2rem;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .action-header {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .action-title {
+            flex: 1;
+        }
+
+        .action-card h3 {
+            font-size: 1.25rem;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .action-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        .action-category.ai { background: #dbeafe; color: #1e40af; }
+        .action-category.corel { background: #fef3c7; color: #92400e; }
+        .action-category.image { background: #d1fae5; color: #065f46; }
+        .action-category.file { background: #e0e7ff; color: #3730a3; }
+        .action-category.chat { background: #fce7f3; color: #831843; }
+
+        .action-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .variables-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .variables-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .variables-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .variable-tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .no-variables {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading::after {
+            content: "⏳";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #dc2626;
+        }
+
+        .error::before {
+            content: "⚠️";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .no-results::before {
+            content: "🔍";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-color);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 RoboClick Actions</h1>
+            <p class="subtitle">Complete Action Documentation</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalActions">-</span>
+                    <span class="stat-label">Total Actions</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="categoriesCount">-</span>
+                    <span class="stat-label">Categories</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="generatedDate">-</span>
+                    <span class="stat-label">Updated</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search actions, descriptions, or variables...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-category="all">All</button>
+                <button class="filter-btn" data-category="ai">AI</button>
+                <button class="filter-btn" data-category="corel">Corel</button>
+                <button class="filter-btn" data-category="image">Image</button>
+                <button class="filter-btn" data-category="file">File</button>
+                <button class="filter-btn" data-category="chat">Chat</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="loading">Loading documentation...</div>
+        </div>
+
+        <footer>
+            <p>Generated from <code>action_documentation.yaml</code></p>
+            <p>RoboClick Automation Framework © 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        let allActions = [];
+        let currentFilter = 'all';
+
+        // Load YAML file
+        async function loadDocumentation() {
+            try {
+                const response = await fetch('configuration/action_documentation.yaml');
+                const yamlText = await response.text();
+                const data = jsyaml.load(yamlText);
+                
+                allActions = data.actions;
+                
+                // Update stats
+                document.getElementById('totalActions').textContent = data.total_actions;
+                document.getElementById('generatedDate').textContent = data.generated_date;
+                
+                // Count categories
+                const categories = new Set(allActions.map(a => getCategory(a.command)));
+                document.getElementById('categoriesCount').textContent = categories.size;
+                
+                renderActions(allActions);
+            } catch (error) {
+                document.querySelector('.content').innerHTML = `
+                    <div class="error">
+                        <h2>Failed to load documentation</h2>
+                        <p>${error.message}</p>
+                        <p>Make sure <code>configuration/action_documentation.yaml</code> exists.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function getCategory(command) {
+            if (command.startsWith('ai_')) return 'ai';
+            if (command.startsWith('corel_')) return 'corel';
+            if (command.startsWith('image_')) return 'image';
+            if (command.startsWith('file_')) return 'file';
+            if (command === 'new_chat' || command === 'continue_chat' || command === 'query') return 'chat';
+            if (command === 'add_image' || command === 'add_file') return 'file';
+            if (command === 'save_image_generated' || command === 'save_image_search_result') return 'image';
+            return 'other';
+        }
+
+        function getIcon(category) {
+            const icons = {
+                'ai': '🤖',
+                'corel': '🎨',
+                'image': '🖼️',
+                'file': '📁',
+                'chat': '💬',
+                'other': '⚙️'
+            };
+            return icons[category] || '⚙️';
+        }
+
+        function renderActions(actions) {
+            const content = document.querySelector('.content');
+            
+            if (actions.length === 0) {
+                content.innerHTML = `
+                    <div class="no-results">
+                        <h2>No actions found</h2>
+                        <p>Try adjusting your search or filter.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = `
+                <div class="actions-grid">
+                    ${actions.map(action => {
+                        const category = getCategory(action.command);
+                        const icon = getIcon(category);
+                        return `
+                            <div class="action-card" data-category="${category}">
+                                <div class="action-header">
+                                    <div class="action-icon">${icon}</div>
+                                    <div class="action-title">
+                                        <h3>${action.command}</h3>
+                                        <span class="action-category ${category}">${category}</span>
+                                    </div>
+                                </div>
+                                <p class="action-description">${action.description}</p>
+                                <div class="variables-section">
+                                    <div class="variables-title">Variables</div>
+                                    ${action.variables.length > 0 
+                                        ? `<div class="variables-list">
+                                            ${action.variables.map(v => `<span class="variable-tag">${v}</span>`).join('')}
+                                           </div>`
+                                        : `<div class="no-variables">No variables</div>`
+                                    }
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        function filterActions() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = allActions;
+            
+            // Filter by category
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(action => getCategory(action.command) === currentFilter);
+            }
+            
+            // Filter by search term
+            if (searchTerm) {
+                filtered = filtered.filter(action => {
+                    return action.command.toLowerCase().includes(searchTerm) ||
+                           action.description.toLowerCase().includes(searchTerm) ||
+                           action.variables.some(v => v.toLowerCase().includes(searchTerm));
+                });
+            }
+            
+            renderActions(filtered);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterActions);
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.category;
+                filterActions();
+            });
+        });
+
+        // Load documentation on page load
+        loadDocumentation();
+    </script>
+</body>
+</html>
