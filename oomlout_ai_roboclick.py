@@ -37,6 +37,8 @@ def action(command_name, variables=None):
         # Auto-detect category based on command name
         if command_name.startswith("ai_") or command_name in ["add_file", "add_image", "save_image_generated"]:
             category = "AI"
+        elif command_name.startswith("browser_"):
+            category = "Browser"
         elif command_name.startswith("corel_"):
             category = "Corel"
         elif command_name.startswith("image_"):
@@ -294,8 +296,10 @@ def run_single(**kwargs):
             break
         #if result is a dict
         elif isinstance(result, dict):
+            print ("Updating workings with result dict")
             for key, value in result.items():
                 workings[key] = value
+                print(f"    Updated workings key: {key} with value: {value}")
             #write kwargs to file_action
             try:
                 with open(file_action, 'w') as file:
@@ -329,14 +333,16 @@ def run_action(**kwargs):
 #==============================================================================
 # ACTION FUNCTIONS
 
-@action("add_file", ["file_name"])
-def add_file(**kwargs):
+
+
+
+
+
+
+###ai ones
+@action("ai_add_image", ["file_name", "position_click"])
+def ai_add_image(**kwargs):
     """Add a file (alias for add_image)"""
-    return add_image(**kwargs)
-
-
-@action("add_image", ["file_name", "position_click"])
-def add_image(**kwargs):
     """Add an image file to the current context"""
     return_value = ""
     print("add_image -- adding an image")
@@ -366,6 +372,12 @@ def add_image(**kwargs):
     #preess escape 5 times in case of any dialog boxes
     robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
     return return_value
+
+
+@action("ai_add_file", ["file_name"])
+def ai_add_file(**kwargs):
+    """Add a file (alias for add_image)"""
+    return ai_add_image(**kwargs)    
 
 
 @action("ai_fix_yaml_copy_paste", ["file_input", "file_output", "remove_top_level", "new_item_name", "search_and_replace"])
@@ -491,16 +503,38 @@ def ai_set_mode(**kwargs):
         robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
         print("     AI mode set to deep research")
 
-#image_crop
 
-@action("close_tab", [])
-def close_tab(**kwargs):
+# browser
+
+@action("browser_close_tab", [])
+def browser_close_tab(**kwargs):
     """Close the current browser tab"""
-    print("close_tab -- closing the current tab")
+    print("browser_close_tab -- closing the current tab")
     #close the current tab
     robo.robo_chrome_close_tab(**kwargs)
     #wait for 5 seconds
     robo.robo_delay(delay=5)  # Wait for the tab to close
+
+@action("browser_open_url", ["url"])
+def browser_open_url(**kwargs):
+    """Open a URL in the browser"""
+    action = kwargs.get("action", {})
+    url = action.get("url", "")
+    print(f"browser_open_url -- opening URL: {url}")
+    robo.robo_chrome_open_url(url=url, delay=15, message="    opening URL in browser")
+
+@action("browser_save_url", ["url", "url_directory"])
+def browser_save_url(**kwargs):
+    """Save the current URL in the browser"""
+    action = kwargs.get("action", {})
+    url = action.get("url", "")
+    url_directory = action.get("url_directory", "web_page")
+    print(f"browser_save_url -- saving URL: {url} to directory: {url_directory}")
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["url"] = url
+    kwargs2["url_directory"] = url_directory
+    kwargs2["delay"] = 15
+    robo.robo_chrome_save_url(**kwargs2)
 
 ##### convert commands
 
@@ -1017,16 +1051,19 @@ def file_copy(**kwargs):
 
 @action("file_create_text_file", ["file_name", "content"])
 def file_create_text_file(**kwargs):
-    file_name = kwargs.get("file_name", "textfile.txt")
-    content = kwargs.get("content", "")
-    delay = kwargs.get("delay", 1)
+    directory = kwargs.get("directory", "")
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "textfile.txt")    
+    file_name_full = os.path.join(directory, file_name)
+    content = action.get("content", "")
+    delay = action.get("delay", 1)
     """Create a text file with specified content"""
     try:
-        with open(file_name, 'w', encoding='utf-8') as f:
+        with open(file_name_full, 'w', encoding='utf-8') as f:
             f.write(content)
-        print(f"Text file created at {file_name}")
+        print(f"Text file created at {file_name_full}")
     except Exception as e:
-        print(f"Error creating text file at {file_name}: {e}")
+        print(f"Error creating text file at {file_name_full }: {e}")
     robo.robo_delay(delay=delay)  # Wait for the file to be created
 ##google commands
 
@@ -2028,6 +2065,7 @@ def generate_standalone_html(documentation, **kwargs):
         }
 
         .action-category.ai { background: #dbeafe; color: #1e40af; }
+        .action-category.browser { background: #fed7aa; color: #9a3412; }
         .action-category.corel { background: #fef3c7; color: #92400e; }
         .action-category.image { background: #d1fae5; color: #065f46; }
         .action-category.file { background: #e0e7ff; color: #3730a3; }
@@ -2148,6 +2186,7 @@ def generate_standalone_html(documentation, **kwargs):
             <div class="filter-buttons">
                 <button class="filter-btn active" data-category="all">All</button>
                 <button class="filter-btn" data-category="ai">AI</button>
+                <button class="filter-btn" data-category="browser">Browser</button>
                 <button class="filter-btn" data-category="corel">Corel</button>
                 <button class="filter-btn" data-category="image">Image</button>
                 <button class="filter-btn" data-category="file">File</button>
@@ -2196,6 +2235,7 @@ def generate_standalone_html(documentation, **kwargs):
         function getIcon(category) {
             const icons = {
                 'AI': '🤖',
+                'Browser': '🌐',
                 'Corel': '🎨',
                 'Image': '🖼️',
                 'File': '📁',
@@ -2359,3 +2399,17 @@ if __name__ == "__main__":
             print(f"    {key}: {value}")
         
         main(**kwargs)
+
+
+#### retired
+
+@action("add_image", ["***RETIRED***", "file_name", "position_click"])
+def add_image(**kwargs):
+    return ai_add_image(**kwargs)
+@action("add_file", ["***RETIRED***", "file_name"])
+def add_file(**kwargs):
+    """Add a file (alias for add_image)"""
+    return ai_add_image(**kwargs)
+@action("close_tab", ["***RETIRED***"])
+def close_tab(**kwargs):
+    browser_close_tab(**kwargs)

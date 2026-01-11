@@ -1,11 +1,11 @@
 actions:
-- command: add_file
+- command: ai_add_file
   description: Add a file (alias for add_image)
   variables:
   - file_name
   category: AI
-- command: add_image
-  description: Add an image file to the current context
+- command: ai_add_image
+  description: Add a file (alias for add_image)
   variables:
   - file_name
   - position_click
@@ -31,10 +31,21 @@ actions:
   variables:
   - mode
   category: AI
-- command: close_tab
+- command: browser_close_tab
   description: Close the current browser tab
   variables: []
-  category: Other
+  category: Browser
+- command: browser_open_url
+  description: Open a URL in the browser
+  variables:
+  - url
+  category: Browser
+- command: browser_save_url
+  description: Save the current URL in the browser
+  variables:
+  - url
+  - url_directory
+  category: Browser
 - command: continue_chat
   description: Continue existing chat session
   variables:
@@ -283,4 +294,4 @@ actions:
   - file_name_6
   category: Other
 generated_date: '2026-01-11'
-total_actions: 39
+total_actions: 41

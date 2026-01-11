@@ -250,6 +250,7 @@
         }
 
         .action-category.ai { background: #dbeafe; color: #1e40af; }
+        .action-category.browser { background: #fed7aa; color: #9a3412; }
         .action-category.corel { background: #fef3c7; color: #92400e; }
         .action-category.image { background: #d1fae5; color: #065f46; }
         .action-category.file { background: #e0e7ff; color: #3730a3; }
@@ -370,6 +371,7 @@
             <div class="filter-buttons">
                 <button class="filter-btn active" data-category="all">All</button>
                 <button class="filter-btn" data-category="ai">AI</button>
+                <button class="filter-btn" data-category="browser">Browser</button>
                 <button class="filter-btn" data-category="corel">Corel</button>
                 <button class="filter-btn" data-category="image">Image</button>
                 <button class="filter-btn" data-category="file">File</button>
@@ -392,7 +394,7 @@
         const DOCUMENTATION_DATA = {
   "actions": [
     {
-      "command": "add_file",
+      "command": "ai_add_file",
       "description": "Add a file (alias for add_image)",
       "variables": [
         "file_name"
@@ -400,8 +402,8 @@
       "category": "AI"
     },
     {
-      "command": "add_image",
-      "description": "Add an image file to the current context",
+      "command": "ai_add_image",
+      "description": "Add a file (alias for add_image)",
       "variables": [
         "file_name",
         "position_click"
@@ -439,10 +441,27 @@
       "category": "AI"
     },
     {
-      "command": "close_tab",
+      "command": "browser_close_tab",
       "description": "Close the current browser tab",
       "variables": [],
-      "category": "Other"
+      "category": "Browser"
+    },
+    {
+      "command": "browser_open_url",
+      "description": "Open a URL in the browser",
+      "variables": [
+        "url"
+      ],
+      "category": "Browser"
+    },
+    {
+      "command": "browser_save_url",
+      "description": "Save the current URL in the browser",
+      "variables": [
+        "url",
+        "url_directory"
+      ],
+      "category": "Browser"
     },
     {
       "command": "continue_chat",
@@ -789,7 +808,7 @@
     }
   ],
   "generated_date": "2026-01-11",
-  "total_actions": 39
+  "total_actions": 41
 };
 
         let allActions = [];
@@ -819,6 +838,7 @@
         function getIcon(category) {
             const icons = {
                 'AI': '🤖',
+                'Browser': '🌐',
                 'Corel': '🎨',
                 'Image': '🖼️',
                 'File': '📁',
