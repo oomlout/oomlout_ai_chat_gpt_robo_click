@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RoboClick Action Documentation</title>
-    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -167,6 +166,26 @@
             padding: 2rem;
         }
 
+        .category-section {
+            margin-bottom: 3rem;
+        }
+
+        .category-heading {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+        }
+
         .actions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -235,6 +254,7 @@
         .action-category.image { background: #d1fae5; color: #065f46; }
         .action-category.file { background: #e0e7ff; color: #3730a3; }
         .action-category.chat { background: #fce7f3; color: #831843; }
+        .action-category.google-doc { background: #ccfbf1; color: #134e4a; }
 
         .action-description {
             color: var(--text-secondary);
@@ -278,38 +298,6 @@
             color: var(--text-secondary);
             font-style: italic;
             font-size: 0.85rem;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .loading::after {
-            content: "⏳";
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 1rem;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .error {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #dc2626;
-        }
-
-        .error::before {
-            content: "⚠️";
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 1rem;
         }
 
         .no-results {
@@ -386,77 +374,463 @@
                 <button class="filter-btn" data-category="image">Image</button>
                 <button class="filter-btn" data-category="file">File</button>
                 <button class="filter-btn" data-category="chat">Chat</button>
+                <button class="filter-btn" data-category="google-doc">Google Doc</button>
             </div>
         </div>
 
-        <div class="content">
-            <div class="loading">Loading documentation...</div>
+        <div class="content" id="content">
         </div>
 
         <footer>
-            <p>Generated from <code>action_documentation.yaml</code></p>
+            <p>Standalone HTML Documentation (no external files required)</p>
             <p>RoboClick Automation Framework © 2026</p>
         </footer>
     </div>
 
     <script>
+        // Embedded data - no external file loading required!
+        const DOCUMENTATION_DATA = {
+  "actions": [
+    {
+      "command": "add_file",
+      "description": "Add a file (alias for add_image)",
+      "variables": [
+        "file_name"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "add_image",
+      "description": "Add an image file to the current context",
+      "variables": [
+        "file_name",
+        "position_click"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_fix_yaml_copy_paste",
+      "description": "Fix YAML formatting from copy-pasted content",
+      "variables": [
+        "file_input",
+        "file_output",
+        "remove_top_level",
+        "new_item_name",
+        "search_and_replace"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_save_text",
+      "description": "Save text content from AI",
+      "variables": [
+        "file_name_full",
+        "file_name_clip",
+        "clip"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_set_mode",
+      "description": "Set AI mode (e.g., deep_research)",
+      "variables": [
+        "mode"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "close_tab",
+      "description": "Close the current browser tab",
+      "variables": [],
+      "category": "Other"
+    },
+    {
+      "command": "continue_chat",
+      "description": "Continue existing chat session",
+      "variables": [
+        "url_chat",
+        "log_url"
+      ],
+      "category": "Chat"
+    },
+    {
+      "command": "convert_svg_to_pdf",
+      "description": "Convert SVG file to PDF format",
+      "variables": [
+        "file_input",
+        "file_output"
+      ],
+      "category": "File"
+    },
+    {
+      "command": "corel_add_text",
+      "description": "Add text in CorelDRAW",
+      "variables": [
+        "text",
+        "x",
+        "y",
+        "font",
+        "font_size",
+        "bold",
+        "italic"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_add_text_box",
+      "description": "Add text box in CorelDRAW",
+      "variables": [
+        "text",
+        "x",
+        "y",
+        "width",
+        "height",
+        "font",
+        "font_size",
+        "bold",
+        "italic"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_close_file",
+      "description": "Close current file in CorelDRAW",
+      "variables": [],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_convert_to_curves",
+      "description": "Convert selected items to curves in CorelDRAW",
+      "variables": [
+        "ungroup",
+        "delay"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_copy",
+      "description": "Copy selected items in CorelDRAW",
+      "variables": [],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_export",
+      "description": "Export file from CorelDRAW",
+      "variables": [
+        "file_name",
+        "file_destination",
+        "file_type",
+        "delay"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_group",
+      "description": "Group selected items in CorelDRAW",
+      "variables": [],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_import",
+      "description": "Import file into CorelDRAW",
+      "variables": [
+        "file_name",
+        "file_source",
+        "x",
+        "y",
+        "width",
+        "height",
+        "max_dimension",
+        "angle",
+        "special"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_object_order",
+      "description": "Change object stacking order in CorelDRAW",
+      "variables": [
+        "order"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_open",
+      "description": "Open file in CorelDRAW",
+      "variables": [
+        "file_name",
+        "file_source"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_page_goto",
+      "description": "Navigate to specific page in CorelDRAW",
+      "variables": [
+        "page_number"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_paste",
+      "description": "Paste copied items in CorelDRAW",
+      "variables": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_save",
+      "description": "Save current file in CorelDRAW",
+      "variables": [
+        "file_name"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_save_as",
+      "description": "Save file with new name in CorelDRAW",
+      "variables": [
+        "file_name",
+        "file_destination"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_set_position",
+      "description": "Set position of selected items in CorelDRAW",
+      "variables": [
+        "x",
+        "y"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_set_rotation",
+      "description": "Set rotation angle of selected items in CorelDRAW",
+      "variables": [
+        "angle"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_set_size",
+      "description": "Set size of selected items in CorelDRAW",
+      "variables": [
+        "width",
+        "height",
+        "max_dimension",
+        "select_all"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_trace",
+      "description": "Trace bitmap image in CorelDRAW",
+      "variables": [
+        "file_name",
+        "remove_background_color_from_entire_image",
+        "delay_trace",
+        "number_of_colors",
+        "detail_minus",
+        "smoothing",
+        "corner_smoothness"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "corel_trace_full",
+      "description": "Complete trace workflow in CorelDRAW",
+      "variables": [
+        "file_source",
+        "file_source_trace",
+        "file_destination",
+        "delay_trace",
+        "delay_png",
+        "max_dimension",
+        "detail_minus",
+        "x",
+        "y",
+        "number_of_colors",
+        "remove_background_color_from_entire_image",
+        "smoothing",
+        "corner_smoothness"
+      ],
+      "category": "Corel"
+    },
+    {
+      "command": "file_copy",
+      "description": "Copy file from source to destination",
+      "variables": [
+        "file_source",
+        "file_destination"
+      ],
+      "category": "File"
+    },
+    {
+      "command": "file_create_text_file",
+      "description": "No description",
+      "variables": [
+        "file_name",
+        "content"
+      ],
+      "category": "File"
+    },
+    {
+      "command": "google_doc_new",
+      "description": "Create a new Google Doc and return its URL",
+      "variables": [
+        "template",
+        "title",
+        "folder"
+      ],
+      "category": "Google Doc"
+    },
+    {
+      "command": "image_crop",
+      "description": "Crop image to specified format",
+      "variables": [
+        "file_input",
+        "file_output",
+        "crop"
+      ],
+      "category": "Image"
+    },
+    {
+      "command": "image_quad_swap_for_tile",
+      "description": "Swap image quadrants for tiling",
+      "variables": [
+        "file_input",
+        "file_output"
+      ],
+      "category": "Image"
+    },
+    {
+      "command": "image_upscale",
+      "description": "Upscale image resolution",
+      "variables": [
+        "file_input",
+        "file_output",
+        "upscale_factor",
+        "crop"
+      ],
+      "category": "Image"
+    },
+    {
+      "command": "new_chat",
+      "description": "Open new chat session",
+      "variables": [
+        "description",
+        "log_url"
+      ],
+      "category": "Chat"
+    },
+    {
+      "command": "query",
+      "description": "Send query to AI",
+      "variables": [
+        "text",
+        "delay",
+        "mode_ai_wait",
+        "method"
+      ],
+      "category": "Chat"
+    },
+    {
+      "command": "save_image_generated",
+      "description": "Save AI-generated image",
+      "variables": [
+        "file_name",
+        "position_click",
+        "mode_ai_wait"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "save_image_search_result",
+      "description": "Save image from search results",
+      "variables": [
+        "index",
+        "file_name",
+        "overwrite",
+        "position_click"
+      ],
+      "category": "Chat"
+    },
+    {
+      "command": "text_jinja_template",
+      "description": "Process text using Jinja template",
+      "variables": [
+        "file_template",
+        "file_source",
+        "file_output",
+        "search_and_replace",
+        "convert_to_pdf",
+        "convert_to_png"
+      ],
+      "category": "Other"
+    },
+    {
+      "command": "wait_for_file",
+      "description": "Wait for file(s) to exist before proceeding",
+      "variables": [
+        "file_name",
+        "file_name_1",
+        "file_name_2",
+        "file_name_3",
+        "file_name_4",
+        "file_name_5",
+        "file_name_6"
+      ],
+      "category": "Other"
+    }
+  ],
+  "generated_date": "2026-01-11",
+  "total_actions": 39
+};
+
         let allActions = [];
         let currentFilter = 'all';
 
-        // Load YAML file
-        async function loadDocumentation() {
-            try {
-                const response = await fetch('configuration/action_documentation.yaml');
-                const yamlText = await response.text();
-                const data = jsyaml.load(yamlText);
-                
-                allActions = data.actions;
-                
-                // Update stats
-                document.getElementById('totalActions').textContent = data.total_actions;
-                document.getElementById('generatedDate').textContent = data.generated_date;
-                
-                // Count categories
-                const categories = new Set(allActions.map(a => getCategory(a.command)));
-                document.getElementById('categoriesCount').textContent = categories.size;
-                
-                renderActions(allActions);
-            } catch (error) {
-                document.querySelector('.content').innerHTML = `
-                    <div class="error">
-                        <h2>Failed to load documentation</h2>
-                        <p>${error.message}</p>
-                        <p>Make sure <code>configuration/action_documentation.yaml</code> exists.</p>
-                    </div>
-                `;
-            }
+        function loadDocumentation() {
+            const data = DOCUMENTATION_DATA;
+            
+            allActions = data.actions;
+            
+            // Update stats
+            document.getElementById('totalActions').textContent = data.total_actions;
+            document.getElementById('generatedDate').textContent = data.generated_date;
+            
+            // Count categories
+            const categories = new Set(allActions.map(a => a.category || 'Other'));
+            document.getElementById('categoriesCount').textContent = categories.size;
+            
+            renderActions(allActions);
         }
 
-        function getCategory(command) {
-            if (command.startsWith('ai_')) return 'ai';
-            if (command.startsWith('corel_')) return 'corel';
-            if (command.startsWith('image_')) return 'image';
-            if (command.startsWith('file_')) return 'file';
-            if (command === 'new_chat' || command === 'continue_chat' || command === 'query') return 'chat';
-            if (command === 'add_image' || command === 'add_file') return 'file';
-            if (command === 'save_image_generated' || command === 'save_image_search_result') return 'image';
-            return 'other';
+        function getCategoryClass(category) {
+            // Convert category to CSS class format
+            return category.toLowerCase().replace(/ /g, '-');
         }
 
         function getIcon(category) {
             const icons = {
-                'ai': '🤖',
-                'corel': '🎨',
-                'image': '🖼️',
-                'file': '📁',
-                'chat': '💬',
-                'other': '⚙️'
+                'AI': '🤖',
+                'Corel': '🎨',
+                'Image': '🖼️',
+                'File': '📁',
+                'Chat': '💬',
+                'Google Doc': '📄',
+                'Other': '⚙️'
             };
             return icons[category] || '⚙️';
         }
 
         function renderActions(actions) {
-            const content = document.querySelector('.content');
+            const content = document.getElementById('content');
             
             if (actions.length === 0) {
                 content.innerHTML = `
@@ -468,35 +842,69 @@
                 return;
             }
             
-            const html = `
-                <div class="actions-grid">
-                    ${actions.map(action => {
-                        const category = getCategory(action.command);
-                        const icon = getIcon(category);
-                        return `
-                            <div class="action-card" data-category="${category}">
-                                <div class="action-header">
-                                    <div class="action-icon">${icon}</div>
-                                    <div class="action-title">
-                                        <h3>${action.command}</h3>
-                                        <span class="action-category ${category}">${category}</span>
+            // Sort actions alphabetically by command name
+            const sortedActions = [...actions].sort((a, b) => a.command.localeCompare(b.command));
+            
+            // Group actions by category
+            const groupedActions = {};
+            sortedActions.forEach(action => {
+                const category = action.category || 'Other';
+                if (!groupedActions[category]) {
+                    groupedActions[category] = [];
+                }
+                groupedActions[category].push(action);
+            });
+            
+            // Sort categories (maintain specific order)
+            const categoryOrder = ['AI', 'Chat', 'Corel', 'File', 'Google Doc', 'Image', 'Other'];
+            const sortedCategories = Object.keys(groupedActions).sort((a, b) => {
+                const indexA = categoryOrder.indexOf(a);
+                const indexB = categoryOrder.indexOf(b);
+                if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+                if (indexA === -1) return 1;
+                if (indexB === -1) return -1;
+                return indexA - indexB;
+            });
+            
+            let html = '';
+            sortedCategories.forEach(category => {
+                const categoryClass = getCategoryClass(category);
+                const icon = getIcon(category);
+                
+                html += `
+                    <div class="category-section">
+                        <h2 class="category-heading">
+                            <span class="category-icon">${icon}</span>
+                            ${category} Actions
+                        </h2>
+                        <div class="actions-grid">
+                            ${groupedActions[category].map(action => {
+                                return `
+                                    <div class="action-card" data-category="${categoryClass}">
+                                        <div class="action-header">
+                                            <div class="action-icon">${icon}</div>
+                                            <div class="action-title">
+                                                <h3>${action.command}</h3>
+                                                <span class="action-category ${categoryClass}">${category}</span>
+                                            </div>
+                                        </div>
+                                        <p class="action-description">${action.description}</p>
+                                        <div class="variables-section">
+                                            <div class="variables-title">Variables</div>
+                                            ${action.variables.length > 0 
+                                                ? `<div class="variables-list">
+                                                    ${action.variables.map(v => `<span class="variable-tag">${v}</span>`).join('')}
+                                                   </div>`
+                                                : `<div class="no-variables">No variables</div>`
+                                            }
+                                        </div>
                                     </div>
-                                </div>
-                                <p class="action-description">${action.description}</p>
-                                <div class="variables-section">
-                                    <div class="variables-title">Variables</div>
-                                    ${action.variables.length > 0 
-                                        ? `<div class="variables-list">
-                                            ${action.variables.map(v => `<span class="variable-tag">${v}</span>`).join('')}
-                                           </div>`
-                                        : `<div class="no-variables">No variables</div>`
-                                    }
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
             
             content.innerHTML = html;
         }
@@ -508,7 +916,10 @@
             
             // Filter by category
             if (currentFilter !== 'all') {
-                filtered = filtered.filter(action => getCategory(action.command) === currentFilter);
+                filtered = filtered.filter(action => {
+                    const categoryClass = getCategoryClass(action.category || 'Other');
+                    return categoryClass === currentFilter;
+                });
             }
             
             // Filter by search term
