@@ -361,12 +361,17 @@ def ai_add_image(**kwargs):
         print(f"File {file_name_absolute} does not exist, skipping action.")
         return_value = "exit"
         return return_value
+    #send "  "
+    robo.robo_keyboard_send(string="  ", delay=2)  # Send two spaces to open the add image dialog
     #tab once
-    robo.robo_keyboard_press_tab(delay=2, repeat=1)  # Press tab once to focus on the add image button
+    robo.robo_keyboard_press_tab(delay=5, repeat=1)  # Press tab once to focus on the add image button
     #down zero times
     #robo.robo_keyboard_press_down(delay=1, repeat=1)  # Press down zero times to select the file input
     #enter once
     robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
+    #new needs two enters maybe
+    if True:
+        robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
     #robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
     robo.robo_keyboard_send(string=file_name_absolute, delay=5)  # Type the file name
     robo.robo_keyboard_press_enter(delay=5)  # Press enter to confirm
