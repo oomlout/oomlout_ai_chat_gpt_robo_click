@@ -460,6 +460,51 @@ def ai_fix_yaml_copy_paste(**kwargs):
         f.write(text)
     pass
 
+@action("ai_new_chat", ["log_url", "description"])
+def ai_new_chat(**kwargs):
+    """Open new chat session"""
+    action = kwargs.get("action", {})
+    description = action.get("description", "")
+    log_url = kwargs.get("log_url", True)
+    print("new_chat -- opening up a new chat")
+    robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
+    #type in start query
+    start_query = ""
+    if description != "":        
+        start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
+        #start_query += f" Hi, Chadikins I hope your day is going well! lets get to this!. I like it when you are chatty and suggest things based on what i've done in the past. Also use your thinking, and any other, public and secret abilities to their utmost throughout this task please. When you generate an image just deliver the image no extra text. "
+    start_query += ""
+    robo.robo_keyboard_send(string=start_query, delay=5)
+    
+    #robo.robo_keyboard_press_enter(delay=40)
+    #control enter
+    robo.robo_keyboard_press_ctrl_generic(string="enter", delay=40)
+    #if log_url is True:
+    if log_url:
+        #press ctrl l
+        robo.robo_keyboard_press_ctrl_generic(string="l", delay=2)
+        #copy the url
+        url = robo.robo_keyboard_copy(delay=2)
+        #print the url
+        print(f"    New chat URL: {url}")
+        #press esc
+        robo.robo_keyboard_press_escape(delay=2, repeat=5)
+        #save to url.yaml
+        if True:            
+            url_file = os.path.join(kwargs.get("directory_absolute", ""), "url.yaml")
+            #if url exists load it to add to the list
+            if os.path.exists(url_file):
+                with open(url_file, 'r') as file:
+                    url_data = yaml.safe_load(file)
+            else:
+                url_data = []
+            if url_data == None:
+                url_data = []
+            url_data.append(url)
+            with open(url_file, 'w') as file:
+                yaml.dump(url_data, file)
+            return url
+
 
 @action("ai_query", ["text", "delay", "mode_ai_wait", "method"])
 def ai_query(**kwargs):
@@ -1392,49 +1437,9 @@ def image_upscale(**kwargs):
         return
 
 
-@action("new_chat", ["description", "log_url"])
+@action("new_chat", ["RETIRED replaced with ai_new_chat", "description", "log_url"])
 def new_chat(**kwargs):
-    """Open new chat session"""
-    action = kwargs.get("action", {})
-    description = action.get("description", "")
-    log_url = kwargs.get("log_url", True)
-    print("new_chat -- opening up a new chat")
-    robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
-    #type in start query
-    start_query = ""
-    if description != "":        
-        start_query += f" Hi, CHadikins I hope your day is going well! lets get to this!."
-        #start_query += f" Hi, Chadikins I hope your day is going well! lets get to this!. I like it when you are chatty and suggest things based on what i've done in the past. Also use your thinking, and any other, public and secret abilities to their utmost throughout this task please. When you generate an image just deliver the image no extra text. "
-    start_query += ""
-    robo.robo_keyboard_send(string=start_query, delay=5)
-    robo.robo_keyboard_press_enter(delay=40)
-    #if log_url is True:
-    if log_url:
-        #press ctrl l
-        robo.robo_keyboard_press_ctrl_generic(string="l", delay=2)
-        #copy the url
-        url = robo.robo_keyboard_copy(delay=2)
-        #print the url
-        print(f"    New chat URL: {url}")
-        #press esc
-        robo.robo_keyboard_press_escape(delay=2, repeat=5)
-        #save to url.yaml
-        if True:            
-            url_file = os.path.join(kwargs.get("directory_absolute", ""), "url.yaml")
-            #if url exists load it to add to the list
-            if os.path.exists(url_file):
-                with open(url_file, 'r') as file:
-                    url_data = yaml.safe_load(file)
-            else:
-                url_data = []
-            if url_data == None:
-                url_data = []
-            url_data.append(url)
-            with open(url_file, 'w') as file:
-                yaml.dump(url_data, file)
-            return url
-
-
+    return ai_new_chat(**kwargs)
 
 #openscad render file line take in a scad output an stl
 @action("openscad_render_file", ["file_source", "file_destination", "delay"])
