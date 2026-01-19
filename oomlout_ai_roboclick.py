@@ -1480,6 +1480,11 @@ def query(**kwargs):
     return ai_query(**kwargs)
     
         
+#ai_save_image'
+@action("ai_save_image", ["file_name", "position_click", "mode_ai_wait"])
+def ai_save_image(**kwargs):
+    """Save AI-generated image"""
+    return save_image_generated(**kwargs)
 
 def ai_wait_mode_fast_check(mode_ai_wait="fast_button_state"):  
     if mode_ai_wait == "fast_button_state" or mode_ai_wait == "fast":
