@@ -461,6 +461,56 @@ def ai_fix_yaml_copy_paste(**kwargs):
     pass
 
 
+@action("ai_query", ["text", "delay", "mode_ai_wait", "method"])
+def ai_query(**kwargs):
+    """Send query to AI"""
+    action = kwargs.get("action", {})
+    print("ai_query -- sending a query")
+    #get the query from the action
+    action = kwargs.get("action", {})
+    delay = action.get("delay", 60)
+    query_text = action.get("text", "")
+    mode_ai = action.get("mode_ai_wait", "slow")
+    method = action.get("method", "typing")  #"standard" or "line_by_line"
+
+
+    #clear text box
+    if True:
+        print("    Clearing text box before query...")
+        #select all
+        robo.robo_keyboard_press_ctrl_generic(string="a", delay=2)
+        #back space
+        robo.robo_keyboard_press_backspace(delay=2, repeat=1)
+
+    if method == "typing":
+        #split the text on line breaks
+        query_text = query_text.replace("\r\n", "\n").replace("\r", "\n")
+        query_text_lines = query_text.split("\n")
+        for line in query_text_lines:
+            #send each line with a delay of 1 second between lines
+            robo.robo_keyboard_send(string=line, delay=0.1)
+            robo.robo_keyboard_press_shift_enter(delay=0.1)  # Press Shift+Enter to create a new line
+    elif method == "paste":
+        #press space twice to ensure focus
+        robo.robo_keyboard_send(string="  ")
+        robo.robo_keyboard_paste(text=query_text)
+        #paste the entire text at once
+        robo.robo_keyboard_press_ctrl_generic(string="v", delay=2)
+    
+
+
+    print(f"Querying with text: {query_text}")
+    
+    if mode_ai =="slow":
+        #robo.robo_keyboard_press_enter(delay=delay)
+        #ctrl enter
+        robo.robo_keyboard_press_ctrl_generic(string="enter", delay=1)
+    elif "fast" in mode_ai: 
+        #robo.robo_keyboard_press_enter(delay=1)
+        robo.robo_keyboard_press_ctrl_generic(string="enter", delay=1)
+        ai_wait_mode_fast_check(mode_ai_wait=mode_ai)
+
+
 @action("ai_save_text", ["file_name_full", "file_name_clip", "clip"])
 def ai_save_text(**kwargs):
     """Save text content from AI"""
@@ -1420,49 +1470,10 @@ def openscad_render_file(**kwargs):
     pass
 
 
-@action("query", ["text", "delay", "mode_ai_wait", "method"])
+@action("query", ["RETIRED use ai_query","text", "delay", "mode_ai_wait", "method"])
 def query(**kwargs):
-    """Send query to AI"""
-    action = kwargs.get("action", {})
-    print("query -- sending a query")
-    #get the query from the action
-    action = kwargs.get("action", {})
-    delay = action.get("delay", 60)
-    query_text = action.get("text", "")
-    mode_ai = action.get("mode_ai_wait", "slow")
-    method = action.get("method", "typing")  #"standard" or "line_by_line"
-
-
-    #clear text box
-    if True:
-        print("    Clearing text box before query...")
-        #select all
-        robo.robo_keyboard_press_ctrl_generic(string="a", delay=2)
-        #back space
-        robo.robo_keyboard_press_backspace(delay=2, repeat=1)
-
-    if method == "typing":
-        #split the text on line breaks
-        query_text = query_text.replace("\r\n", "\n").replace("\r", "\n")
-        query_text_lines = query_text.split("\n")
-        for line in query_text_lines:
-            #send each line with a delay of 1 second between lines
-            robo.robo_keyboard_send(string=line, delay=0.1)
-            robo.robo_keyboard_press_shift_enter(delay=0.1)  # Press Shift+Enter to create a new line
-    elif method == "paste":
-        #press space twice to ensure focus
-        robo.robo_keyboard_send(string="  ")
-        robo.robo_keyboard_paste(text=query_text)
-        #paste the entire text at once
-        robo.robo_keyboard_press_ctrl_generic(string="v", delay=2)
+    return ai_query(**kwargs)
     
-    print(f"Querying with text: {query_text}")
-    
-    if mode_ai =="slow":
-        robo.robo_keyboard_press_enter(delay=delay)
-    elif "fast" in mode_ai: 
-        robo.robo_keyboard_press_enter(delay=1)
-        ai_wait_mode_fast_check(mode_ai_wait=mode_ai)
         
 
 def ai_wait_mode_fast_check(mode_ai_wait="fast_button_state"):  
