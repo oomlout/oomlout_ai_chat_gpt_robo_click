@@ -256,6 +256,7 @@
         .action-category.file { background: #e0e7ff; color: #3730a3; }
         .action-category.chat { background: #fce7f3; color: #831843; }
         .action-category.google-doc { background: #ccfbf1; color: #134e4a; }
+        .action-category.openscad { background: #e9d5ff; color: #581c87; }
 
         .action-description {
             color: var(--text-secondary);
@@ -377,6 +378,7 @@
                 <button class="filter-btn" data-category="file">File</button>
                 <button class="filter-btn" data-category="chat">Chat</button>
                 <button class="filter-btn" data-category="google-doc">Google Doc</button>
+                <button class="filter-btn" data-category="openscad">OpenSCAD</button>
             </div>
         </div>
 
@@ -719,6 +721,15 @@
       "category": "Image"
     },
     {
+      "command": "image_png_transparent_to_white",
+      "description": "Convert transparent PNG to white background PNG",
+      "variables": [
+        "file_input",
+        "file_output"
+      ],
+      "category": "Image"
+    },
+    {
       "command": "image_quad_swap_for_tile",
       "description": "Swap image quadrants for tiling",
       "variables": [
@@ -746,6 +757,16 @@
         "log_url"
       ],
       "category": "Chat"
+    },
+    {
+      "command": "openscad_render_file",
+      "description": "No description",
+      "variables": [
+        "file_source",
+        "file_destination",
+        "delay"
+      ],
+      "category": "OpenSCAD"
     },
     {
       "command": "query",
@@ -807,8 +828,8 @@
       "category": "Other"
     }
   ],
-  "generated_date": "2026-01-11",
-  "total_actions": 41
+  "generated_date": "2026-01-18",
+  "total_actions": 43
 };
 
         let allActions = [];
@@ -844,6 +865,7 @@
                 'File': '📁',
                 'Chat': '💬',
                 'Google Doc': '📄',
+                'OpenSCAD': '🔷',
                 'Other': '⚙️'
             };
             return icons[category] || '⚙️';

@@ -49,6 +49,8 @@ def action(command_name, variables=None):
             category = "Chat"
         elif command_name.startswith("google_"):
             category = "Google Doc"
+        elif command_name.startswith("openscad_"):
+            category = "OpenSCAD"
         else:
             category = "Other"
         
@@ -1183,6 +1185,54 @@ def image_crop(**kwargs):
         return
 
 
+#image png transparent to white
+@action("image_png_transparent_to_white", ["file_input", "file_output"])
+def image_png_transparent_to_white(**kwargs):
+    """Convert transparent PNG to white background PNG"""
+    action = kwargs.get("action", {})
+    directory = kwargs.get("directory", "")
+    file_input = action.get("file_source", "")
+    file_input = os.path.join(directory, file_input)
+    file_input_full = os.path.abspath(file_input)
+    file_output_default = file_input.replace(".png", "_whitebg.png")
+    file_output = action.get("file_destination", file_output_default)
+    overwrite = action.get("overwrite", True)
+    if not overwrite and os.path.exists(file_output):
+        print(f"file_output {file_output} already exists and overwrite is set to False, skipping transparent to white conversion")
+        return
+    else:
+        #delete destination file if it exists
+        if os.path.exists(file_output):
+            os.remove(file_output)
+            print(f"Removed existing output file {file_output}")
+    if directory not in file_output:
+        file_output = os.path.join(directory, file_output)
+    
+    #if file_input is a file
+    if os.path.isfile(file_input):
+        #use pil to convert transparent png to white background png
+        from PIL import Image
+        try:
+            with Image.open(file_input_full) as img:
+                # Convert image to RGBA if not already in that mode
+                if img.mode != 'RGBA':
+                    img = img.convert('RGBA')
+                # Create a new image with a white background
+                white_bg = Image.new('RGBA', img.size, (255, 255, 255, 255))
+                white_bg.paste(img, (0, 0), img)
+                # Convert back to RGB mode
+                white_bg = white_bg.convert('RGB')
+                # Save the new image
+                white_bg.save(file_output)
+                print(f"Transparent PNG converted to white background and saved to {file_output}")
+        except Exception as e:
+            print(f"Error converting image {file_input_full}: {e}")
+            return
+    else:
+        print(f"file_input {file_input} does not exist, skipping transparent to white conversion")
+        return
+
+
 @action("image_quad_swap_for_tile", ["file_input", "file_output"])
 def image_quad_swap_for_tile(**kwargs):
     """Swap image quadrants for tiling"""
@@ -1328,6 +1378,41 @@ def new_chat(**kwargs):
             with open(url_file, 'w') as file:
                 yaml.dump(url_data, file)
             return url
+
+
+
+#openscad render file line take in a scad output an stl
+@action("openscad_render_file", ["file_source", "file_destination", "delay"])
+def openscad_render_file(**kwargs):
+    import os
+    """Render OpenSCAD file to STL"""
+    action = kwargs.get("action", {})
+    directory = kwargs.get("directory", "")
+    file_source = action.get("file_source", "")
+    file_source_full = os.path.abspath(directory + "/" + file_source)
+    file_destination = action.get("file_destination", "")
+    file_destination_full = os.path.abspath(directory + "/" + file_destination)
+    overwrite = action.get("overwrite", True)
+    if not overwrite and os.path.exists(file_destination_full):
+        print(f"    File {file_destination_full} already exists and overwrite is False, skipping rendering.")
+        return
+    else:
+        #delete destination file if it exists
+        if os.path.exists(file_destination_full):
+            os.remove(file_destination_full)
+            print(f"    Removed existing file {file_destination_full} before rendering.")
+    delay = action.get("delay", 10)
+    print("openscad_render_file -- rendering openscad file")
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_source"] = file_source
+    kwargs2["file_destination"] = file_destination
+    kwargs2["delay"] = delay
+    #use os.system to call openscad
+    import os
+    command = f'openscad -o "{file_destination_full}" "{file_source_full}"'
+    print(f"    Running command: {command}")
+    os.system(command)
+    pass
 
 
 @action("query", ["text", "delay", "mode_ai_wait", "method"])
@@ -2071,6 +2156,7 @@ def generate_standalone_html(documentation, **kwargs):
         .action-category.file { background: #e0e7ff; color: #3730a3; }
         .action-category.chat { background: #fce7f3; color: #831843; }
         .action-category.google-doc { background: #ccfbf1; color: #134e4a; }
+        .action-category.openscad { background: #e9d5ff; color: #581c87; }
 
         .action-description {
             color: var(--text-secondary);
@@ -2192,6 +2278,7 @@ def generate_standalone_html(documentation, **kwargs):
                 <button class="filter-btn" data-category="file">File</button>
                 <button class="filter-btn" data-category="chat">Chat</button>
                 <button class="filter-btn" data-category="google-doc">Google Doc</button>
+                <button class="filter-btn" data-category="openscad">OpenSCAD</button>
             </div>
         </div>
 
@@ -2241,6 +2328,7 @@ def generate_standalone_html(documentation, **kwargs):
                 'File': '📁',
                 'Chat': '💬',
                 'Google Doc': '📄',
+                'OpenSCAD': '🔷',
                 'Other': '⚙️'
             };
             return icons[category] || '⚙️';

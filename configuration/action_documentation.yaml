@@ -229,6 +229,12 @@ actions:
   - file_output
   - crop
   category: Image
+- command: image_png_transparent_to_white
+  description: Convert transparent PNG to white background PNG
+  variables:
+  - file_input
+  - file_output
+  category: Image
 - command: image_quad_swap_for_tile
   description: Swap image quadrants for tiling
   variables:
@@ -249,6 +255,13 @@ actions:
   - description
   - log_url
   category: Chat
+- command: openscad_render_file
+  description: No description
+  variables:
+  - file_source
+  - file_destination
+  - delay
+  category: OpenSCAD
 - command: query
   description: Send query to AI
   variables:
@@ -293,5 +306,5 @@ actions:
   - file_name_5
   - file_name_6
   category: Other
-generated_date: '2026-01-11'
-total_actions: 41
+generated_date: '2026-01-18'
+total_actions: 43
