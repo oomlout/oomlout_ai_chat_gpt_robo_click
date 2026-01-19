@@ -549,7 +549,7 @@ def ai_query(**kwargs):
     if mode_ai =="slow":
         #robo.robo_keyboard_press_enter(delay=delay)
         #ctrl enter
-        robo.robo_keyboard_press_ctrl_generic(string="enter", delay=1)
+        robo.robo_keyboard_press_ctrl_generic(string="enter", delay=delay)
     elif "fast" in mode_ai: 
         #robo.robo_keyboard_press_enter(delay=1)
         robo.robo_keyboard_press_ctrl_generic(string="enter", delay=1)
