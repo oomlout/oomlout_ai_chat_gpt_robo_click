@@ -1622,6 +1622,33 @@ def openscad_render(**kwargs):
         print(f"Error rendering OpenSCAD file {file_input_full}: {e}")
 
 
+##### utility stuff
+def get_directory(part):
+    
+    #type, size, color, description_main, description_extra
+    tags = ["classification","type", "size", "color", "description_main", "description_extra", "manufacturer", "part_number"]
+
+    directory = ""
+
+    for tag in tags:
+        if tag in part:
+            if part[tag] != "":
+                if directory != "":
+                    directory += "_"
+                directory += part[tag]
+    #make lowercase and replace spaces with underscores and slashes with underscores
+    directory = directory.replace(" ", "_")
+    directory = directory.replace("/", "_")
+    directory = directory.replace("\\", "_")
+    directory = directory.replace("__", "_")
+    directory = directory.replace(")", "_")
+    directory = directory.replace("(", "_")
+    directory = directory.lower()
+
+    directory = f"parts\\{directory}"
+
+    return directory
+
 
 # Documentation-only tweaks for ai_fix_yaml_copy_paste and corel_trace_full
 # ...existing code for ai_fix_yaml_copy_paste and corel_trace_full, but update docstrings...
@@ -1666,3 +1693,5 @@ if __name__ == "__main__":
             print(f"HTML documentation written to {output_path}")
         except Exception as e:
             print(f"Error generating HTML documentation: {e}")
+
+#
