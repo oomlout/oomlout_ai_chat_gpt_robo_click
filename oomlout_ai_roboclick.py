@@ -1731,6 +1731,28 @@ def ai_wait_mode_fast_check_state_of_submit_button_approach():
             running = False
             robo.robo_delay(delay=2)
 
+def save_image(**kwargs):
+    #position_click = kwargs.get("position_click", [960, 500])
+    #position_click = kwargs.get("position_click", [960, 360])
+    position_click = kwargs.get("position_click", [960, 280])
+    
+    action = kwargs.get("action", {})
+    file_name = action.get("file_name", "working.png")   
+    directory_absolute = kwargs.get("directory_absolute", "")
+    file_name_absolute = os.path.join(directory_absolute, file_name)
+    file_name_abs = os.path.abspath(file_name) 
+    print(f"Saving image as {file_name}")
+    #save the image
+    robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
+    #press down twice
+    robo.robo_keyboard_press_down(delay=1, repeat=2)
+    robo.robo_keyboard_press_enter(delay=5)
+    robo.robo_keyboard_send(string=file_name_absolute, delay=5)
+    robo.robo_keyboard_press_enter(delay=5)
+    robo.robo_keyboard_send(string="y", delay=5)
+    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
+    print(f"Image saved as {file_name}")
+
 # Documentation-only tweaks for ai_fix_yaml_copy_paste and corel_trace_full
 # ...existing code for ai_fix_yaml_copy_paste and corel_trace_full, but update docstrings...
 
