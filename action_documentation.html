@@ -425,6 +425,36 @@
       "category": "AI"
     },
     {
+      "command": "ai_new_chat",
+      "description": "Open new chat session",
+      "variables": [
+        "log_url",
+        "description"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_query",
+      "description": "Send query to AI",
+      "variables": [
+        "text",
+        "delay",
+        "mode_ai_wait",
+        "method"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_save_image",
+      "description": "Save AI-generated image",
+      "variables": [
+        "file_name",
+        "position_click",
+        "mode_ai_wait"
+      ],
+      "category": "AI"
+    },
+    {
       "command": "ai_save_text",
       "description": "Save text content from AI",
       "variables": [
@@ -742,17 +772,18 @@
       "command": "image_upscale",
       "description": "Upscale image resolution",
       "variables": [
-        "file_input",
-        "file_output",
-        "upscale_factor",
+        "file_source",
+        "file_destination",
+        "scale",
         "crop"
       ],
       "category": "Image"
     },
     {
       "command": "new_chat",
-      "description": "Open new chat session",
+      "description": "No description",
       "variables": [
+        "RETIRED replaced with ai_new_chat",
         "description",
         "log_url"
       ],
@@ -770,8 +801,9 @@
     },
     {
       "command": "query",
-      "description": "Send query to AI",
+      "description": "No description",
       "variables": [
+        "RETIRED use ai_query",
         "text",
         "delay",
         "mode_ai_wait",
@@ -828,8 +860,8 @@
       "category": "Other"
     }
   ],
-  "generated_date": "2026-01-18",
-  "total_actions": 43
+  "generated_date": "2026-01-20",
+  "total_actions": 46
 };
 
         let allActions = [];

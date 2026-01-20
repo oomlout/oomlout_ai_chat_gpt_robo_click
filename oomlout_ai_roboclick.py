@@ -1382,23 +1382,29 @@ def image_quad_swap_for_tile(**kwargs):
 
 #image commands
 
-@action("image_upscale", ["file_input", "file_output", "upscale_factor", "crop"])
+@action("image_upscale", ["file_source", "file_destination", "scale", "crop"])
 def image_upscale(**kwargs):
     """Upscale image resolution"""
     action = kwargs.get("action", {})
     directory = kwargs.get("directory", "")
     file_input = action.get("file_input", "")
+    if file_input == "":
+        file_input = action.get("file_source", "")
     file_input = os.path.join(directory, file_input)
     file_input_full = os.path.abspath(file_input)
     #png or jpeg or jpg
     file_output_default = file_input.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
-    file_output = action.get("file_output", file_output_default)
+    file_output = action.get("file_output", "")
+    if file_output == "":
+        file_output = action.get("file_destination", file_output_default)
     file_output_base = file_output
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
-    upscale_factor = action.get("upscale_factor", 2)
+    upscale_factor = action.get("scale", None)
+    if upscale_factor is None:
+        upscale_factor = action.get("upscale_factor", 2)
     #make upscale factor an int
-    upscale_factor = int(upscale_factor)
+    upscale_factor = float(upscale_factor)
     #if file_input is a file
     crop = action.get("crop", "")  #left, upper, right, lower
     if os.path.isfile(file_input):
@@ -1435,6 +1441,7 @@ def image_upscale(**kwargs):
     else:
         print(f"file_input {file_input} does not exist, skipping image upscale")
         return
+    pass
 
 
 @action("new_chat", ["RETIRED replaced with ai_new_chat", "description", "log_url"])
