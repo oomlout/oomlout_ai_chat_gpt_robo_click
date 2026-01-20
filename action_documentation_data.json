@@ -1,6 +1,25 @@
 {
   "actions": [
     {
+      "command": "add_file",
+      "description": "RETIRED - use ai_add_image instead.",
+      "variables": [
+        "***RETIRED***",
+        "file_name"
+      ],
+      "category": "Retired"
+    },
+    {
+      "command": "add_image",
+      "description": "RETIRED - use ai_add_image instead.",
+      "variables": [
+        "***RETIRED***",
+        "file_name",
+        "position_click"
+      ],
+      "category": "Retired"
+    },
+    {
       "command": "ai_add_file",
       "description": "Add a file (alias for add_image)",
       "variables": [
@@ -50,6 +69,16 @@
       "category": "AI"
     },
     {
+      "command": "ai_save_image",
+      "description": "Save AI-generated image (alias).",
+      "variables": [
+        "file_name",
+        "position_click",
+        "mode_ai_wait"
+      ],
+      "category": "AI"
+    },
+    {
       "command": "ai_save_text",
       "description": "Save text content from AI",
       "variables": [
@@ -89,6 +118,14 @@
         "url_directory"
       ],
       "category": "Browser"
+    },
+    {
+      "command": "close_tab",
+      "description": "RETIRED - use browser_close_tab instead.",
+      "variables": [
+        "***RETIRED***"
+      ],
+      "category": "Retired"
     },
     {
       "command": "continue_chat",
@@ -362,8 +399,110 @@
         "file_destination"
       ],
       "category": "Image"
+    },
+    {
+      "command": "image_upscale",
+      "description": "Upscale image resolution.",
+      "variables": [
+        "file_input",
+        "file_output",
+        "upscale_factor",
+        "crop"
+      ],
+      "category": "Image"
+    },
+    {
+      "command": "new_chat",
+      "description": "RETIRED - use ai_new_chat instead.",
+      "variables": [
+        "***RETIRED***",
+        "description",
+        "log_url"
+      ],
+      "category": "Retired"
+    },
+    {
+      "command": "openscad_render",
+      "description": "Render OpenSCAD file to specified format.",
+      "variables": [
+        "file_source",
+        "file_destination",
+        "render_type",
+        "delay"
+      ],
+      "category": "OpenSCAD"
+    },
+    {
+      "command": "openscad_render_file",
+      "description": "Compatibility wrapper for openscad_render.",
+      "variables": [
+        "file_source",
+        "file_destination",
+        "delay"
+      ],
+      "category": "OpenSCAD"
+    },
+    {
+      "command": "query",
+      "description": "RETIRED - use ai_query instead.",
+      "variables": [
+        "***RETIRED***",
+        "text",
+        "delay",
+        "mode_ai_wait",
+        "method"
+      ],
+      "category": "Retired"
+    },
+    {
+      "command": "save_image_generated",
+      "description": "Save AI-generated image.",
+      "variables": [
+        "file_name",
+        "position_click",
+        "mode_ai_wait"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "save_image_search_result",
+      "description": "Save image from search results.",
+      "variables": [
+        "index",
+        "file_name",
+        "overwrite",
+        "position_click"
+      ],
+      "category": "Chat"
+    },
+    {
+      "command": "text_jinja_template",
+      "description": "Process text using Jinja template.",
+      "variables": [
+        "file_template",
+        "file_source",
+        "file_output",
+        "search_and_replace",
+        "convert_to_pdf",
+        "convert_to_png"
+      ],
+      "category": "Other"
+    },
+    {
+      "command": "wait_for_file",
+      "description": "Wait until one of the specified files exists.",
+      "variables": [
+        "file_name",
+        "file_name_1",
+        "file_name_2",
+        "file_name_3",
+        "file_name_4",
+        "file_name_5",
+        "file_name_6"
+      ],
+      "category": "Other"
     }
   ],
   "generated_date": "2026-01-20",
-  "total_actions": 37
+  "total_actions": 50
 }
