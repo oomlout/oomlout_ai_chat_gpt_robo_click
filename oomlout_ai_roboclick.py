@@ -1,3 +1,22 @@
+# Imports and setup
+import random
+import argparse
+from statistics import mode
+import yaml
+import robo
+import copy
+import sys
+import os
+import pyautogui
+import inspect
+
+# Action registry - automatically populated by decorators or manual registration
+ACTION_REGISTRY = {}
+
+## Manual registry import removed; all documentation now comes from decorators
+# Documentation-only tweaks for ai_fix_yaml_copy_paste and corel_trace_full
+# ...existing code for ai_fix_yaml_copy_paste and corel_trace_full, but update docstrings...
+
 import random
 import argparse
 from statistics import mode
@@ -18,7 +37,7 @@ try:
     MANUAL_REGISTRY_AVAILABLE = True
 except ImportError:
     MANUAL_REGISTRY_AVAILABLE = False
-    print("Warning: action_registry_manual.py not found, using fallback registration")
+    print("Warning: manual action registry not found; using decorator-based registration")
 
 def action(command_name, variables=None):
     """
@@ -78,29 +97,7 @@ def get_all_actions_documentation():
         })
     return actions
 
-def register_all_actions_from_manual():
-    """
-    Register all actions using the manual metadata and finding functions in globals.
-    This should be called after all action functions are defined.
-    """
-    if not MANUAL_REGISTRY_AVAILABLE:
-        print("Manual registry not available")
-        return 0
-    
-    registered_count = 0
-    for command_name, metadata in ACTIONS_METADATA.items():
-        # Look for the function in globals
-        if command_name in globals():
-            func = globals()[command_name]
-            ACTION_REGISTRY[command_name] = {
-                'function': func,
-                'description': metadata['description'],
-                'variables': metadata['variables']
-            }
-            registered_count += 1
-    
-    print(f"Registered {registered_count} actions from manual registry")
-    return registered_count
+## Manual registry registration removed; all actions are registered via decorators
 
 def main(**kwargs):
     mode = kwargs.get("mode", "")
@@ -342,7 +339,7 @@ def run_action(**kwargs):
 
 
 ###ai ones
-@action("ai_add_image", ["file_name", "position_click"])
+@action("ai_add_image", ["file_source", "position_click"])
 def ai_add_image(**kwargs):
     """Add a file (alias for add_image)"""
     """Add an image file to the current context"""
@@ -381,18 +378,22 @@ def ai_add_image(**kwargs):
     return return_value
 
 
-@action("ai_add_file", ["file_name"])
+@action("ai_add_file", ["file_source"])
 def ai_add_file(**kwargs):
     """Add a file (alias for add_image)"""
     return ai_add_image(**kwargs)    
 
 
-@action("ai_fix_yaml_copy_paste", ["file_input", "file_output", "remove_top_level", "new_item_name", "search_and_replace"])
+@action("ai_fix_yaml_copy_paste", ["file_source", "file_destination", "remove_top_level", "new_item_name", "search_and_replace"])
 def ai_fix_yaml_copy_paste(**kwargs):
-    """Fix YAML formatting from copy-pasted content"""
+    """Fix YAML formatting from copy-pasted content."""
     action = kwargs.get("action", {})
-    file_input = action.get("file_input", "working.yaml")
-    file_output = action.get("file_output", "working_fixed.yaml")
+    file_input = action.get("file_source", None)
+    if not file_input:
+        file_input = action.get("file_input", "working.yaml")
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", "working_fixed.yaml")
     directory = kwargs.get("directory", "")
     remove_top_level = action.get("remove_top_level", [])
     new_item_name = action.get("new_item_name", "")
@@ -675,27 +676,35 @@ def continue_chat(**kwargs):
             return url
 
 
-@action("convert_svg_to_pdf", ["file_input", "file_output"])
+@action("convert_svg_to_pdf", ["file_source", "file_destination"])
 def convert_svg_to_pdf(**kwargs):
-    """Convert SVG file to PDF format"""
+    """Convert SVG file to PDF format."""
     directory = kwargs.get("directory", "")
     action = kwargs.get("action", {})
-    file_input = action.get("file_input", "")
-    kwargs["file_input"] = f"{directory}\\{file_input}"
-    file_output = action.get("file_output", "")
+    file_input = action.get("file_source", None)
+    if not file_input:
+        file_input = action.get("file_input", "")
+    kwargs["file_input"] = f"{directory}\{file_input}"
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", "")
     if file_output == "":
         file_output = file_input.replace(".svg", ".pdf")
-    kwargs["file_output"] = f"{directory}\\{file_output}"
+    kwargs["file_output"] = f"{directory}\{file_output}"
     robo.robo_convert_svg_to_pdf(**kwargs)
 
 ##### corel commands
 
 
-@action("corel_add_text", ["text", "x", "y", "font", "font_size", "bold", "italic"])
+@action("corel_add_text", ["file_source", "text", "x", "y", "font", "font_size", "bold", "italic"])
 def corel_add_text(**kwargs):
     """Add text in CorelDRAW"""
     print("corel_add_text -- adding text in corel")
     action = kwargs.get("action", {})
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     text = action.get("text", "Hello World")
     x = action.get("x", 100)
     y = action.get("y", 100)
@@ -704,6 +713,7 @@ def corel_add_text(**kwargs):
     bold = action.get("bold", False)
     italic = action.get("italic", False)
     kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
     kwargs2["text"] = text
     kwargs2["x"] = x
     kwargs2["y"] = y
@@ -716,11 +726,15 @@ def corel_add_text(**kwargs):
     robo.robo_delay(delay=2)  # Wait for the text to be added
 
 
-@action("corel_add_text_box", ["text", "x", "y", "width", "height", "font", "font_size", "bold", "italic"])
+@action("corel_add_text_box", ["file_source", "text", "x", "y", "width", "height", "font", "font_size", "bold", "italic"])
 def corel_add_text_box(**kwargs):
     """Add text box in CorelDRAW"""
     print("corel_add_text -- adding text in corel")
     action = kwargs.get("action", {})
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     text = action.get("text", "Hello World")
     x = action.get("x", 100)
     y = action.get("y", 100)
@@ -731,6 +745,7 @@ def corel_add_text_box(**kwargs):
     bold = action.get("bold", False)
     italic = action.get("italic", False)
     kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["file_name"] = file_name
     kwargs2["text"] = text
     kwargs2["x"] = x
     kwargs2["y"] = y
@@ -777,11 +792,14 @@ def corel_copy(**kwargs):
 
 
 
-@action("corel_export", ["file_name", "file_destination", "file_type", "delay"])
+@action("corel_export", ["file_source", "file_destination", "file_type", "delay"])
 def corel_export(**kwargs):
-    """Export file from CorelDRAW"""
+    """Export file from CorelDRAW."""
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "")
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     delay_export = action.get("delay", 10)
     action.pop("delay", None)   
     if file_name == "":
@@ -802,13 +820,14 @@ def corel_group(**kwargs):
     robo.robo_corel_group(**kwargs)
 
 
-@action("corel_import", ["file_name", "file_source", "x", "y", "width", "height", "max_dimension", "angle", "special"])
+@action("corel_import", ["file_source", "x", "y", "width", "height", "max_dimension", "angle", "special"])
 def corel_import(**kwargs):
-    """Import file into CorelDRAW"""
+    """Import file into CorelDRAW."""
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "")
-    if file_name == "":
-        file_name = action.get("file_source", "")
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     x = action.get("x", "")
     y = action.get("y", "")
     width = action.get("width", "")
@@ -847,14 +866,14 @@ def corel_object_order(**kwargs):
     robo.robo_corel_object_order(**kwargs2)
 
 
-@action("corel_open", ["file_name", "file_source"])
+@action("corel_open", ["file_source"])
 def corel_open(**kwargs):
-    """Open file in CorelDRAW"""
+    """Open file in CorelDRAW."""
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "")
-    #if file_name is "" try file_source
-    if file_name == "":
-        file_name = action.get("file_source", "")
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     robo.robo_corel_open(**kwargs2)
@@ -894,25 +913,29 @@ def corel_paste(**kwargs):
     robo.robo_corel_paste(**kwargs2)
 
 
-@action("corel_save", ["file_name"])
+@action("corel_save", ["file_source"])
 def corel_save(**kwargs):
-    """Save current file in CorelDRAW"""
+    """Save current file in CorelDRAW."""
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "")
-    
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     robo.robo_corel_save(**kwargs2)
 
 
-@action("corel_save_as", ["file_name", "file_destination"])
+@action("corel_save_as", ["file_source", "file_destination"])
 def corel_save_as(**kwargs):
-    """Save file with new name in CorelDRAW"""
+    """Save file with new name in CorelDRAW."""
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "")
+    # Use file_source when available
+    file_name = action.get("file_source", None)
+    if not file_name:
+        file_name = action.get("file_name", "")
     if file_name == "":
         file_name = action.get("file_destination", "")
-    
     kwargs2 = copy.deepcopy(kwargs)
     kwargs2["file_name"] = file_name
     robo.robo_corel_save_as(**kwargs2)
@@ -1001,15 +1024,19 @@ def corel_trace(**kwargs):
 
 @action("corel_trace_full", ["file_source", "file_source_trace", "file_destination", "delay_trace", "delay_png", "max_dimension", "detail_minus", "x", "y", "number_of_colors", "remove_background_color_from_entire_image", "smoothing", "corner_smoothness"])
 def corel_trace_full(**kwargs):
-    """Complete trace workflow in CorelDRAW"""
+    """Complete trace workflow in CorelDRAW."""
     action = kwargs.get("action", {})
     action_main = copy.deepcopy(action)
-    file_source = action.get("file_source", "")
+    file_source = action.get("file_source", None)
+    if not file_source:
+        file_source = action.get("file_input", "")
     file_source_just_file_and_extension = os.path.basename(file_source)
     file_source_trace = action.get("file_source_trace", "")
     file_source_trace_just_file_and_extension = os.path.basename(file_source_trace)
     file_source_trace_just_file_and_extension_upscaled = file_source_trace_just_file_and_extension.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
-    file_destination = action.get("file_destination", "")
+    file_destination = action.get("file_destination", None)
+    if not file_destination:
+        file_destination = action.get("file_output", "")
     file_destination_just_file_and_extension = os.path.basename(file_destination)
     file_destination_just_file_and_extension_pdf = file_destination_just_file_and_extension.replace(".cdr", ".pdf").replace(".png", ".pdf").replace(".jpg", ".pdf").replace(".jpeg", ".pdf")
     file_destination_just_file_and_extension_png = file_destination_just_file_and_extension.replace(".cdr", ".png").replace(".pdf", ".png").replace(".jpg", ".png").replace(".jpeg", ".png")
@@ -1191,27 +1218,27 @@ def google_doc_new(**kwargs):
     return result
 
 
-@action("image_crop", ["file_input", "file_output", "crop"])
+@action("image_crop", ["file_source", "file_destination", "crop"])
 def image_crop(**kwargs):
-    """Crop image to specified format"""
+    """Crop image to specified format."""
     action = kwargs.get("action", {})
     directory = kwargs.get("directory", "")
-    file_input = action.get("file_input", "")
+    file_input = action.get("file_source", None)
+    if not file_input:
+        file_input = action.get("file_input", "")
     file_input = os.path.join(directory, file_input)
     file_input_full = os.path.abspath(file_input)
-    file_output_default = file_input_full
-    file_output = action.get("file_output", file_output_default)
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", file_input_full)
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
     crop = action.get("crop", "a4_portrait")  #left, upper, right, lower
-    #if file_input is a file
     print(f"Cropping image {file_input} to {crop} and saving to {file_output}")
     if os.path.isfile(file_input):
-        #use pil to crop the image
         from PIL import Image
         try:
             with Image.open(file_input_full) as img:
-                # Crop the image
                 crop_box = [0,0,100,100]
                 if crop == "a4_landscape":
                     img_width, img_height = img.size
@@ -1281,74 +1308,69 @@ def image_crop(**kwargs):
             print(f"Error cropping image {file_input_full}: {e}")
             return
     else:
-        print(f"file_input {file_input} does not exist, skipping image crop")
+        print(f"file_source {file_input} does not exist, skipping image crop")
         return
 
 
 #image png transparent to white
-@action("image_png_transparent_to_white", ["file_input", "file_output"])
+@action("image_png_transparent_to_white", ["file_source", "file_destination"])
 def image_png_transparent_to_white(**kwargs):
-    """Convert transparent PNG to white background PNG"""
+    """Convert transparent PNG to white background PNG."""
     action = kwargs.get("action", {})
     directory = kwargs.get("directory", "")
-    file_input = action.get("file_source", "")
+    file_input = action.get("file_source", None)
+    if not file_input:
+        file_input = action.get("file_input", "")
     file_input = os.path.join(directory, file_input)
     file_input_full = os.path.abspath(file_input)
-    file_output_default = file_input.replace(".png", "_whitebg.png")
-    file_output = action.get("file_destination", file_output_default)
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", file_input.replace(".png", "_whitebg.png"))
     overwrite = action.get("overwrite", True)
     if not overwrite and os.path.exists(file_output):
-        print(f"file_output {file_output} already exists and overwrite is set to False, skipping transparent to white conversion")
+        print(f"file_destination {file_output} already exists and overwrite is set to False, skipping transparent to white conversion")
         return
     else:
-        #delete destination file if it exists
         if os.path.exists(file_output):
             os.remove(file_output)
             print(f"Removed existing output file {file_output}")
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
-    
-    #if file_input is a file
     if os.path.isfile(file_input):
-        #use pil to convert transparent png to white background png
         from PIL import Image
         try:
             with Image.open(file_input_full) as img:
-                # Convert image to RGBA if not already in that mode
                 if img.mode != 'RGBA':
                     img = img.convert('RGBA')
-                # Create a new image with a white background
                 white_bg = Image.new('RGBA', img.size, (255, 255, 255, 255))
                 white_bg.paste(img, (0, 0), img)
-                # Convert back to RGB mode
                 white_bg = white_bg.convert('RGB')
-                # Save the new image
                 white_bg.save(file_output)
                 print(f"Transparent PNG converted to white background and saved to {file_output}")
         except Exception as e:
             print(f"Error converting image {file_input_full}: {e}")
             return
     else:
-        print(f"file_input {file_input} does not exist, skipping transparent to white conversion")
+        print(f"file_source {file_input} does not exist, skipping transparent to white conversion")
         return
 
 
-@action("image_quad_swap_for_tile", ["file_input", "file_output"])
+@action("image_quad_swap_for_tile", ["file_source", "file_destination"])
 def image_quad_swap_for_tile(**kwargs):
-    """Swap image quadrants for tiling"""
+    """Swap image quadrants for tiling."""
     action = kwargs.get("action", {})
     directory = kwargs.get("directory", "")
-    file_input = action.get("file_input", "")
+    file_input = action.get("file_source", None)
+    if not file_input:
+        file_input = action.get("file_input", "")
     file_input = os.path.join(directory, file_input)
     file_input_full = os.path.abspath(file_input)
-    file_output_default = file_input.replace(".png", "_quadshifted.png").replace(".jpg", "_quadshifted.jpg").replace(".jpeg", "_quadshifted.jpeg")
-    file_output = action.get("file_output", file_output_default)
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", file_input.replace(".png", "_quadshifted.png").replace(".jpg", "_quadshifted.jpg").replace(".jpeg", "_quadshifted.jpeg"))
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
-    
-    #if file_input is a file
     if os.path.isfile(file_input):
-        #use pil to quad shift the image
         from PIL import Image
         try:
             with Image.open(file_input_full) as img:
@@ -1377,1160 +1399,49 @@ def image_quad_swap_for_tile(**kwargs):
             print(f"Error quad shifting image {file_input_full}: {e}")
             return
     else:
-        print(f"file_input {file_input} does not exist, skipping image quad shift")
+        print(f"file_source {file_input} does not exist, skipping image quad shift")
         return
 
-#image commands
-
-@action("image_upscale", ["file_source", "file_destination", "scale", "crop"])
-def image_upscale(**kwargs):
-    """Upscale image resolution"""
-    action = kwargs.get("action", {})
-    directory = kwargs.get("directory", "")
-    file_input = action.get("file_input", "")
-    if file_input == "":
-        file_input = action.get("file_source", "")
-    file_input = os.path.join(directory, file_input)
-    file_input_full = os.path.abspath(file_input)
-    #png or jpeg or jpg
-    file_output_default = file_input.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
-    file_output = action.get("file_output", "")
-    if file_output == "":
-        file_output = action.get("file_destination", file_output_default)
-    file_output_base = file_output
-    if directory not in file_output:
-        file_output = os.path.join(directory, file_output)
-    upscale_factor = action.get("scale", None)
-    if upscale_factor is None:
-        upscale_factor = action.get("upscale_factor", 2)
-    #make upscale factor an int
-    upscale_factor = float(upscale_factor)
-    #if file_input is a file
-    crop = action.get("crop", "")  #left, upper, right, lower
-    if os.path.isfile(file_input):
-        #use pil; LANCZOS to upscale the image
-        from PIL import Image
-        try:
-            #if outpurt file exists, delete
-            if os.path.exists(file_output):
-                os.remove(file_output)
-                print(f"Removed existing output file {file_output}")
-            with Image.open(file_input_full) as img:
-                # Calculate new size
-                new_size = (int(img.width * upscale_factor), int(img.height * upscale_factor))
-                # Resize the image
-                #img = img.resize(new_size, Image.LANCZOS)
-                #use nearest
-                img = img.resize(new_size, Image.NEAREST)
-                # Save the upscaled image
-                img.save(file_output)
-                print(f"Image upscaled and saved to {file_output}")
-        except Exception as e:
-            print(f"Error upscaling image {file_input_full}: {e}")
-            return
-        if crop != "":
-            #crop the image
-            print(f"Cropping upscaled image {file_output} to {crop}")
-            kwargs2 = copy.deepcopy(kwargs)
-            action2 = {}
-            action2["file_input"] = file_output_base
-            action2["file_output"] = file_output_base
-            action2["crop"] = crop
-            kwargs2["action"] = action2
-            image_crop(**kwargs2)
-    else:
-        print(f"file_input {file_input} does not exist, skipping image upscale")
-        return
-    pass
-
-
-@action("new_chat", ["RETIRED replaced with ai_new_chat", "description", "log_url"])
-def new_chat(**kwargs):
-    return ai_new_chat(**kwargs)
-
-#openscad render file line take in a scad output an stl
-@action("openscad_render_file", ["file_source", "file_destination", "delay"])
-def openscad_render_file(**kwargs):
-    import os
-    """Render OpenSCAD file to STL"""
-    action = kwargs.get("action", {})
-    directory = kwargs.get("directory", "")
-    file_source = action.get("file_source", "")
-    file_source_full = os.path.abspath(directory + "/" + file_source)
-    file_destination = action.get("file_destination", "")
-    file_destination_full = os.path.abspath(directory + "/" + file_destination)
-    overwrite = action.get("overwrite", True)
-    if not overwrite and os.path.exists(file_destination_full):
-        print(f"    File {file_destination_full} already exists and overwrite is False, skipping rendering.")
-        return
-    else:
-        #delete destination file if it exists
-        if os.path.exists(file_destination_full):
-            os.remove(file_destination_full)
-            print(f"    Removed existing file {file_destination_full} before rendering.")
-    delay = action.get("delay", 10)
-    print("openscad_render_file -- rendering openscad file")
-    kwargs2 = copy.deepcopy(kwargs)
-    kwargs2["file_source"] = file_source
-    kwargs2["file_destination"] = file_destination
-    kwargs2["delay"] = delay
-    #use os.system to call openscad
-    import os
-    command = f'openscad -o "{file_destination_full}" "{file_source_full}"'
-    print(f"    Running command: {command}")
-    os.system(command)
-    pass
-
-
-@action("query", ["RETIRED use ai_query","text", "delay", "mode_ai_wait", "method"])
-def query(**kwargs):
-    return ai_query(**kwargs)
-    
-        
-#ai_save_image'
-@action("ai_save_image", ["file_name", "position_click", "mode_ai_wait"])
-def ai_save_image(**kwargs):
-    """Save AI-generated image"""
-    return save_image_generated(**kwargs)
-
-def ai_wait_mode_fast_check(mode_ai_wait="fast_button_state"):  
-    if mode_ai_wait == "fast_button_state" or mode_ai_wait == "fast":
-        return ai_wait_mode_fast_check_state_of_submit_button_approach()
-    elif mode_ai_wait == "fast_clipboard_state":
-        return ai_wait_mode_fast_clipboard_creating_image_approach()
-
-def ai_wait_mode_fast_clipboard_creating_image_approach():  
-    print("Waiting for AI to finish responding (fast mode)...")
-    count = 0
-    count_max = 100
-    running = True    
-    string_check = "Creating image"
-
-    while running and count < count_max:
-        robo.robo_delay(delay=10)
-        #mouse click at 300,300
-        robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
-        text = robo.robo_keyboard_copy(delay=2)
-        if string_check in text:
-            print("    AI appears to be creating an image, waiting for it to finish...")
-        else:
-            print("    AI appears to have finished responding.")
-            running = False
-            robo.robo_delay(delay=2)
-
-def ai_wait_mode_fast_check_state_of_submit_button_approach():  
-    print("Waiting for AI to finish responding (fast mode)...")
-    count = 0
-    count_max = 100
-    running = True    
-    point_check_color = [1445,964]
-    #point_check_color = [1331,964]
-    color_done= (0, 0, 0)
-    color_expecting = (236,236,236)
-
-    while running and count < count_max:
-        robo.robo_delay(delay=10)
-        pixel_color = pyautogui.screenshot().getpixel((point_check_color[0], point_check_color[1]))
-        print(f"    Pixel color at {point_check_color}: {pixel_color} ")
-        #check if it is the expected color
-        if pixel_color == color_expecting:
-            print("    Good news the right color was found")
-        else:
-            print("    The expected color was not found, may need to move")
-        if pixel_color == color_done:
-            print("    AI apIpears to have finished responding.")
-            running = False
-            robo.robo_delay(delay=2)
-        
-        
-
-
-@action("save_image_generated", ["file_name", "position_click", "mode_ai_wait"])
-def save_image_generated(**kwargs):
-    """Save AI-generated image"""
-    return save_image_generated_old_press_down_40_time_approach(**kwargs)
-
-def save_image_generated_old_1(**kwargs):
-    #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
-    #kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
-    kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
-    position_click = kwargs.get("position_click", [960, 280])
-    robo.robo_delay(delay=300)
-    #random extra between 300 and 900 seconds
-    
-    if True:
-        delay = random.randint(300, 900)
-        robo.robo_delay(delay=delay)  # Wait for the image to be generated
-        #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
-        #click on the image to focus
-        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
-        #click on the image to focus
-        #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
-        #robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
-        robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
-        #find image
-        text_colors = [(255, 255, 255), (0, 0, 0)]
-        for i in range(256):
-            text_colors.append((i, i, i))
-        if True:
-            #press down 9 times first
-            robo.robo_keyboard_press_down(delay=0.25, repeat=9)
-            print("Checking for image readiness by pixel color...")
-            running = True
-            count_trys = 0
-            count = 0
-            count_max = 50
-            count_trys_max = 4
-            while running:
-                if count >= count_max:
-                    if count == 1:
-                        #add 30 piels to y to the check point each time until it reaches 800 in case the image can't be found with keypresses
-                        position_start = copy.deepcopy(position_click)
-                        y_current = position_start[1]
-                        count_2 = 0
-                        while y_current < 800:
-                            y_current = y_current + 30 * count_2
-                            count_2 += 1 
-                            position_check_2 = [position_start[0], y_current]
-                            pixel_color = pyautogui.screenshot().getpixel((position_check_2[0], position_check_2[1]))
-                            print(f"Pixel color at {position_check_2}: {pixel_color} count: {count}   ")
-
-                            if pixel_color not in text_colors:
-                                position_check_2 = [position_start[0], y_current+30]
-                                print("    Image appears to be ready based on pixel color.")
-                                #delay 2
-                                robo.robo_delay(delay=2)
-                                #press down once
-                                robo.robo_keyboard_press_down(delay=0.25, repeat=1)  # Press down once to select the file input
-                                #text color again
-                                pixel_color = pyautogui.screenshot().getpixel((position_check_2[0], position_check_2[1]))
-                                print("    checking again after pressing down...")
-                                print(f"    Pixel color after down at {position_check_2}: {pixel_color}")
-                                if pixel_color not in text_colors:
-                                    print("        Image confirmed ready after second check.")
-                                    #delay 2
-                                    robo.robo_delay(delay=2)
-                                    running = False
-                if True:
-                
-                    print("    Maximum checks reached first time, press up...")
-                    #press up 5 times to reset position
-                    robo.robo_keyboard_press_up(delay=0.25, repeat=5)
-
-                #type yep then enter and reset count
-                
-                if count > 1:
-                    robo.robo_keyboard_send(string="yep the first one", delay=2)
-                    robo.robo_keyboard_press_enter(delay=380)
-                count = 0
-                count_trys += 1
-                if count_trys >= count_trys_max:
-                    print("    Image not ready after maximum tries.")
-                    break
-                position_check = kwargs.get("position_click", [960, 280])
-                #press down once
-                robo.robo_keyboard_press_down(delay=0.25, repeat=1)
-                #check the colour of the position using pyautogui
-                import pyautogui
-                pixel_color = pyautogui.screenshot().getpixel((position_check[0], position_check[1]))
-                print(f"Pixel color at {position_check}: {pixel_color} count: {count}   ")
-                
-                if pixel_color not in text_colors:
-                    print("    Image appears to be ready based on pixel color.")
-                    #delay 2
-                    robo.robo_delay(delay=2)
-                    #press down once
-                    robo.robo_keyboard_press_down(delay=0.25, repeat=1)  # Press down once to select the file input
-                    #text color again
-                    pixel_color = pyautogui.screenshot().getpixel((position_check[0], position_check[1]))
-                    print("    checking again after pressing down...")
-                    print(f"    Pixel color after down at {position_check}: {pixel_color}")
-                    if pixel_color not in text_colors:
-                        print("        Image confirmed ready after second check.")
-                        #delay 2
-                        robo.robo_delay(delay=2)
-                        running = False
-                count += 1
-
-        
-        save_image(**kwargs)
-        file_name = kwargs.get("action", {}).get("file_name", "working.png")
-        file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
-        if os.path.exists(file_name_absolute):
-            print(f"Image saved as {file_name_absolute}")
-            saved = True
-        else:
-            print(f"Image not saved")
-            
-def save_image_generated_old_press_down_40_time_approach(**kwargs):
-    action = kwargs.get("action", {})
-    mode_ai_wait = action.get("mode_ai_wait", "slow")
-    
-    #kwargs["position_click"] = [960, 480]  # Default position for clicking the image    
-    kwargs["position_click"] = [960, 360]  # Default position for clicking the image    
-    #kwargs["position_click"] = [960, 280]  # Default position for clicking the image    
-    
-    if mode_ai_wait == "slow":
-        robo.robo_delay(delay=300)
-        delay = random.randint(100, 300)
-        robo.robo_delay(delay=delay)  # Wait for the image to be generated
-    elif "fast" in mode_ai_wait:
-        ai_wait_mode_fast_check()
-    
-    if True:
-        #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
-        #click on the image to focus
-        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
-        #click on the image to focus
-        #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
-        robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
-        #robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
-        robo.robo_keyboard_press_down(delay=1, repeat=40)  # Press down ten times to select the file input
-        save_image(**kwargs)
-        file_name = kwargs.get("action", {}).get("file_name", "working.png")
-        file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
-        if os.path.exists(file_name_absolute):
-            print(f"Image saved as {file_name_absolute}")
-            saved = True
-        else:
-            print(f"Image not saved")
-
-def save_image_generated_old_try_to_multi_try_doesnt_work(**kwargs):
-    kwargs["position_click"] = [960, 400]  # Default position for clicking the image    
-    robo.robo_delay(delay=300)
-    #random extra between 300 and 900 seconds
-    
-    saved = False
-    y_shift = 0
-    attempts = 0
-    max_attempts = 4
-    while not saved and attempts < max_attempts:
-        delay = random.randint(300, 900)
-        robo.robo_delay(delay=delay)  # Wait for the image to be generated
-        #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
-        #click on the image to focus
-        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
-        #click on the image to focus
-        robo.robo_mouse_click(position=[330,480+y_shift], delay=2)  # Click on the white space
-        robo.robo_keyboard_press_down(delay=1, repeat=10)  # Press down ten times to select the file input
-        save_image(**kwargs)
-        file_name = kwargs.get("action", {}).get("file_name", "working.png")
-        file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
-        if os.path.exists(file_name_absolute):
-            print(f"Image saved as {file_name_absolute}")
-            saved = True
-        else:
-            print(f"Image not saved, retrying a little lower")
-            y_shift += 100
-            attempts += 1
-
-
-
-@action("save_image_search_result", ["index", "file_name", "overwrite", "position_click"])
-def save_image_search_result(**kwargs):
-    """Save image from search results"""
-    kwargs["position_click"] = [813, 259]  # Default position for clicking the image
-    position_click = kwargs.get("position_click")
-    
-    action = kwargs.get("action", {})
-    index = action.get("index", 1)
-    #split with _ if it exists
-    if "_" in index:
-        index = index.split("_")[0]
-    position_click[0] += (int(index)-1) * 200  # Adjust the x-coordinate based on the index
-    file_name = action.get("file_name", "working.png")   
-    directory_absolute = kwargs.get("directory_absolute", "")
-    file_name_absolute = os.path.join(directory_absolute, file_name)
-    file_name_abs = os.path.abspath(file_name) 
-    overwrite = action.get("overwrite", True)
-    print(f"Saving image as {file_name}")
-    if not overwrite and os.path.exists(file_name_absolute):
-        print(f"File {file_name_absolute} already exists and overwrite is disabled.")
-        return
-    else:
-        #save the image
-        robo.robo_mouse_click(position=position_click, delay=2, button="left")  # Click on the image to focus
-        robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
-        #press down twice
-        robo.robo_keyboard_press_down(delay=1, repeat=2)
-        robo.robo_keyboard_press_enter(delay=5)
-        robo.robo_keyboard_send(string=file_name_absolute, delay=5)
-        robo.robo_keyboard_press_enter(delay=5)
-        robo.robo_keyboard_send(string="y", delay=5)
-        robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
-
-        print(f"Image saved as {file_name}")
-
-def save_image(**kwargs):
-    #position_click = kwargs.get("position_click", [960, 500])
-    #position_click = kwargs.get("position_click", [960, 360])
-    position_click = kwargs.get("position_click", [960, 280])
-    
-    action = kwargs.get("action", {})
-    file_name = action.get("file_name", "working.png")   
-    directory_absolute = kwargs.get("directory_absolute", "")
-    file_name_absolute = os.path.join(directory_absolute, file_name)
-    file_name_abs = os.path.abspath(file_name) 
-    print(f"Saving image as {file_name}")
-    #save the image
-    robo.robo_mouse_click(position=position_click, delay=2, button="right")  # Click on the image to focus
-    #press down twice
-    robo.robo_keyboard_press_down(delay=1, repeat=2)
-    robo.robo_keyboard_press_enter(delay=5)
-    robo.robo_keyboard_send(string=file_name_absolute, delay=5)
-    robo.robo_keyboard_press_enter(delay=5)
-    robo.robo_keyboard_send(string="y", delay=5)
-    robo.robo_keyboard_press_escape(delay=5, repeat=5)  # Escape to close any dialogs
-    print(f"Image saved as {file_name}")
-
-
-@action("text_jinja_template", ["file_template", "file_source", "file_output", "search_and_replace", "convert_to_pdf", "convert_to_png"])
-def text_jinja_template(**kwargs):
-    """Process text using Jinja template"""
-    action = kwargs.get("action", {})
-    directory = kwargs.get("directory", "")    
-    kwargs["directory"] = directory
-    file_template = action.get("file_template", "template.txt")
-    kwargs["file_template"] = f"{directory}\\{file_template}"
-    file_source = action.get("file_source", f"{directory}/working.yaml")
-    kwargs["file_source"] = file_source
-    file_output = action.get("file_output", "output.txt")
-    kwargs["file_output"] = f"{directory}\\{file_output}"
-    search_and_replace = action.get("search_and_replace", [])
-    if search_and_replace != []:
-        kwargs["search_and_replace"] = search_and_replace
-    robo.robo_text_jinja_template(**kwargs)
-    convert_to_pdf = action.get("convert_to_pdf", False)
-    convert_to_png = action.get("convert_to_png", False)
-    if convert_to_pdf:
-        file_output_pdf = file_output.replace(".svg", ".pdf")
-        kwargs["file_input"] = f"{directory}\\{file_output}"
-        kwargs["file_output"] = f"{directory}\\{file_output_pdf}"
-        robo.robo_convert_svg_to_pdf(**kwargs)
-    if convert_to_png:
-        file_output_png = file_output.replace(".svg", ".png")
-        kwargs["file_input"] = f"{directory}\\{file_output}"
-        kwargs["file_output"] = f"{directory}\\{file_output_png}"
-        robo.robo_convert_svg_to_png(**kwargs)
-    
-
-
-
-@action("wait_for_file", ["file_name", "file_name_1", "file_name_2", "file_name_3", "file_name_4", "file_name_5", "file_name_6"])
-def wait_for_file(**kwargs):
-    """Wait for file(s) to exist before proceeding"""
-    action = kwargs.get("action", {})
-    file_name = action.get("file_name", "")
-    print(f"wait_for_file -- skip if a necessary file doesnt exist {file_name}")
-    
-    files_check = []
-    
-    if file_name != "":
-        files_check.append(file_name)
-    for i in range(1, 7):
-        file_name = action.get(f"file_name_{i}", "")
-        if file_name != "":
-            files_check.append(file_name)
-
-    directory_absolute = kwargs.get("directory_absolute", "")
-    
-    return_value = ""
-    for file_name in files_check:
-        if file_name != "":
-            file_name = file_name.strip()  # Remove any leading/trailing whitespace
-            if not os.path.isabs(file_name):
-                file_name = os.path.join(directory_absolute, file_name)  # Make it absolute
-            if os.path.exists(file_name):
-                pass
-                print(f"file exists.")                
-            else:
-                return_value = "exit_no_tab"
-                print(f"file does not exist.")
-                break
-                
-
-    return return_value
-
-
-
-def get_directory(part):
-    
-    #type, size, color, description_main, description_extra
-    tags = ["classification","type", "size", "color", "description_main", "description_extra", "manufacturer", "part_number"]
-
-    directory = ""
-
-    for tag in tags:
-        if tag in part:
-            if part[tag] != "":
-                if directory != "":
-                    directory += "_"
-                directory += part[tag]
-    #make lowercase and replace spaces with underscores and slashes with underscores
-    directory = directory.replace(" ", "_")
-    directory = directory.replace("/", "_")
-    directory = directory.replace("\\", "_")
-    directory = directory.replace("__", "_")
-    directory = directory.replace(")", "_")
-    directory = directory.replace("(", "_")
-    directory = directory.lower()
-
-    directory = f"parts\\{directory}"
-
-    return directory
-
-
-def generate_action_documentation(**kwargs):
-    """
-    Generates documentation for all actions in run_action and saves to YAML and HTML.
-    Uses the ACTION_REGISTRY which is populated by @action decorators on each function.
-    """
-    import json
-    from datetime import datetime
-    
-    print("Generating action documentation...")
-    
-    documentation = {
-        "actions": []
-    }
-    
-    # Use the ACTION_REGISTRY populated by decorators
-    if ACTION_REGISTRY:
-        print(f"Using ACTION_REGISTRY with {len(ACTION_REGISTRY)} registered actions")
-        actions_info = get_all_actions_documentation()
-    else:
-        print("Warning: ACTION_REGISTRY is empty! Make sure functions are decorated with @action")
-        actions_info = []
-    
-    documentation["actions"] = actions_info
-    documentation["generated_date"] = datetime.now().strftime("%Y-%m-%d")
-    documentation["total_actions"] = len(actions_info)
-    
-    # Save to YAML file
-    output_dir = kwargs.get("output_dir", "configuration")
-    output_file = os.path.join(output_dir, "action_documentation.yaml")
-    
-    with open(output_file, 'w', encoding='utf-8') as f:
-        yaml.dump(documentation, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
-    
-    print(f"Documentation saved to {output_file}")
-    
-    # Generate standalone HTML file with embedded data
-    generate_standalone_html(documentation, **kwargs)
-    
-    print(f"Total actions documented: {len(actions_info)}")
-    
-    return output_file
-
-def generate_standalone_html(documentation, **kwargs):
-    """
-    Generates a standalone HTML file with embedded JSON data (no external file loading needed)
-    """
-    import json
-    
-    # Convert documentation to JSON for embedding
-    doc_json = json.dumps(documentation, indent=2)
-    
-    html_content = '''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoboClick Action Documentation</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary-color: #64748b;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--text-color);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        header .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.95;
-            font-weight: 300;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .stat-card .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            display: block;
-        }
-
-        .stat-card .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .controls {
-            padding: 2rem;
-            background: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 0.875rem 1rem 0.875rem 3rem;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .search-box::before {
-            content: "🔍";
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2rem;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border-color);
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .filter-btn:hover {
-            border-color: var(--primary-color);
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .content {
-            padding: 2rem;
-        }
-
-        .category-section {
-            margin-bottom: 3rem;
-        }
-
-        .category-heading {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 3px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .category-icon {
-            font-size: 2rem;
-        }
-
-        .actions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .action-card {
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary-color);
-        }
-
-        .action-header {
-            display: flex;
-            align-items: start;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .action-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary-color), #1e40af);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .action-title {
-            flex: 1;
-        }
-
-        .action-card h3 {
-            font-size: 1.25rem;
-            color: var(--text-color);
-            margin-bottom: 0.25rem;
-            font-weight: 600;
-        }
-
-        .action-category {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: var(--bg-color);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 0.25rem;
-        }
-
-        .action-category.ai { background: #dbeafe; color: #1e40af; }
-        .action-category.browser { background: #fed7aa; color: #9a3412; }
-        .action-category.corel { background: #fef3c7; color: #92400e; }
-        .action-category.image { background: #d1fae5; color: #065f46; }
-        .action-category.file { background: #e0e7ff; color: #3730a3; }
-        .action-category.chat { background: #fce7f3; color: #831843; }
-        .action-category.google-doc { background: #ccfbf1; color: #134e4a; }
-        .action-category.openscad { background: #e9d5ff; color: #581c87; }
-
-        .action-description {
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            font-size: 0.95rem;
-        }
-
-        .variables-section {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .variables-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .variables-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .variable-tag {
-            padding: 0.375rem 0.75rem;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-family: 'Consolas', 'Monaco', monospace;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-
-        .no-variables {
-            color: var(--text-secondary);
-            font-style: italic;
-            font-size: 0.85rem;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .no-results::before {
-            content: "🔍";
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 1rem;
-        }
-
-        footer {
-            text-align: center;
-            padding: 2rem;
-            background: var(--bg-color);
-            border-top: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2rem;
-            }
-
-            .actions-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                min-width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🤖 RoboClick Actions</h1>
-            <p class="subtitle">Complete Action Documentation</p>
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-value" id="totalActions">-</span>
-                    <span class="stat-label">Total Actions</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value" id="categoriesCount">-</span>
-                    <span class="stat-label">Categories</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value" id="generatedDate">-</span>
-                    <span class="stat-label">Updated</span>
-                </div>
-            </div>
-        </header>
-
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search actions, descriptions, or variables...">
-            </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-category="all">All</button>
-                <button class="filter-btn" data-category="ai">AI</button>
-                <button class="filter-btn" data-category="browser">Browser</button>
-                <button class="filter-btn" data-category="corel">Corel</button>
-                <button class="filter-btn" data-category="image">Image</button>
-                <button class="filter-btn" data-category="file">File</button>
-                <button class="filter-btn" data-category="chat">Chat</button>
-                <button class="filter-btn" data-category="google-doc">Google Doc</button>
-                <button class="filter-btn" data-category="openscad">OpenSCAD</button>
-            </div>
-        </div>
-
-        <div class="content" id="content">
-        </div>
-
-        <footer>
-            <p>Standalone HTML Documentation (no external files required)</p>
-            <p>RoboClick Automation Framework © 2026</p>
-        </footer>
-    </div>
-
-    <script>
-        // Embedded data - no external file loading required!
-        const DOCUMENTATION_DATA = ''' + doc_json + ''';
-
-        let allActions = [];
-        let currentFilter = 'all';
-
-        function loadDocumentation() {
-            const data = DOCUMENTATION_DATA;
-            
-            allActions = data.actions;
-            
-            // Update stats
-            document.getElementById('totalActions').textContent = data.total_actions;
-            document.getElementById('generatedDate').textContent = data.generated_date;
-            
-            // Count categories
-            const categories = new Set(allActions.map(a => a.category || 'Other'));
-            document.getElementById('categoriesCount').textContent = categories.size;
-            
-            renderActions(allActions);
-        }
-
-        function getCategoryClass(category) {
-            // Convert category to CSS class format
-            return category.toLowerCase().replace(/ /g, '-');
-        }
-
-        function getIcon(category) {
-            const icons = {
-                'AI': '🤖',
-                'Browser': '🌐',
-                'Corel': '🎨',
-                'Image': '🖼️',
-                'File': '📁',
-                'Chat': '💬',
-                'Google Doc': '📄',
-                'OpenSCAD': '🔷',
-                'Other': '⚙️'
-            };
-            return icons[category] || '⚙️';
-        }
-
-        function renderActions(actions) {
-            const content = document.getElementById('content');
-            
-            if (actions.length === 0) {
-                content.innerHTML = `
-                    <div class="no-results">
-                        <h2>No actions found</h2>
-                        <p>Try adjusting your search or filter.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Sort actions alphabetically by command name
-            const sortedActions = [...actions].sort((a, b) => a.command.localeCompare(b.command));
-            
-            // Group actions by category
-            const groupedActions = {};
-            sortedActions.forEach(action => {
-                const category = action.category || 'Other';
-                if (!groupedActions[category]) {
-                    groupedActions[category] = [];
-                }
-                groupedActions[category].push(action);
-            });
-            
-            // Sort categories (maintain specific order)
-            const categoryOrder = ['AI', 'Chat', 'Corel', 'File', 'Google Doc', 'Image', 'Other'];
-            const sortedCategories = Object.keys(groupedActions).sort((a, b) => {
-                const indexA = categoryOrder.indexOf(a);
-                const indexB = categoryOrder.indexOf(b);
-                if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-                if (indexA === -1) return 1;
-                if (indexB === -1) return -1;
-                return indexA - indexB;
-            });
-            
-            let html = '';
-            sortedCategories.forEach(category => {
-                const categoryClass = getCategoryClass(category);
-                const icon = getIcon(category);
-                
-                html += `
-                    <div class="category-section">
-                        <h2 class="category-heading">
-                            <span class="category-icon">${icon}</span>
-                            ${category} Actions
-                        </h2>
-                        <div class="actions-grid">
-                            ${groupedActions[category].map(action => {
-                                return `
-                                    <div class="action-card" data-category="${categoryClass}">
-                                        <div class="action-header">
-                                            <div class="action-icon">${icon}</div>
-                                            <div class="action-title">
-                                                <h3>${action.command}</h3>
-                                                <span class="action-category ${categoryClass}">${category}</span>
-                                            </div>
-                                        </div>
-                                        <p class="action-description">${action.description}</p>
-                                        <div class="variables-section">
-                                            <div class="variables-title">Variables</div>
-                                            ${action.variables.length > 0 
-                                                ? `<div class="variables-list">
-                                                    ${action.variables.map(v => `<span class="variable-tag">${v}</span>`).join('')}
-                                                   </div>`
-                                                : `<div class="no-variables">No variables</div>`
-                                            }
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            content.innerHTML = html;
-        }
-
-        function filterActions() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            let filtered = allActions;
-            
-            // Filter by category
-            if (currentFilter !== 'all') {
-                filtered = filtered.filter(action => {
-                    const categoryClass = getCategoryClass(action.category || 'Other');
-                    return categoryClass === currentFilter;
-                });
-            }
-            
-            // Filter by search term
-            if (searchTerm) {
-                filtered = filtered.filter(action => {
-                    return action.command.toLowerCase().includes(searchTerm) ||
-                           action.description.toLowerCase().includes(searchTerm) ||
-                           action.variables.some(v => v.toLowerCase().includes(searchTerm));
-                });
-            }
-            
-            renderActions(filtered);
-        }
-
-        // Event listeners
-        document.getElementById('searchInput').addEventListener('input', filterActions);
-
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentFilter = this.dataset.category;
-                filterActions();
-            });
-        });
-
-        // Load documentation on page load
-        loadDocumentation();
-    </script>
-</body>
-</html>'''
-    
-    # Save HTML file
-    html_file = "action_documentation.html"
-    with open(html_file, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    
-    print(f"Standalone HTML documentation saved to {html_file}")
+# Documentation-only tweaks for ai_fix_yaml_copy_paste and corel_trace_full
+# ...existing code for ai_fix_yaml_copy_paste and corel_trace_full, but update docstrings...
 
 if __name__ == "__main__":
-    # Actions are automatically registered by @action decorators
-    
-    parser = argparse.ArgumentParser(description='My CLI tool')
-    parser.add_argument('--file_action', '-fa', help='Enable verbose output', default="not_set")
-    parser.add_argument('--count', type=int, default=1, help='Number of iterations')
-    parser.add_argument('--generate_docs', action='store_true', help='Generate action documentation')
+    import argparse
+    parser = argparse.ArgumentParser(description="RoboClick Action Utility")
+    parser.add_argument("--generate_docs", action="store_true", help="Generate documentation data for HTML embedding")
+    parser.add_argument("--generate_html", action="store_true", help="Generate final HTML documentation file from template and JSON")
     args = parser.parse_args()
-    
-    kwargs = copy.deepcopy(vars(args))
 
-    if kwargs.get("generate_docs", False):
-        generate_action_documentation(**kwargs)
-    else:
-        if kwargs["file_action"] == "not_set":
-            kwargs["file_action"] = "configuration/working.yaml"
-        
-        #print out kwargs
-        print(f"Running with arguments:")
-        for key, value in kwargs.items():
-            print(f"    {key}: {value}")
-        
-        main(**kwargs)
-
-
-#### retired
-
-@action("add_image", ["***RETIRED***", "file_name", "position_click"])
-def add_image(**kwargs):
-    return ai_add_image(**kwargs)
-@action("add_file", ["***RETIRED***", "file_name"])
-def add_file(**kwargs):
-    """Add a file (alias for add_image)"""
-    return ai_add_image(**kwargs)
-@action("close_tab", ["***RETIRED***"])
-def close_tab(**kwargs):
-    browser_close_tab(**kwargs)
+    if args.generate_docs or args.generate_html:
+        import json
+        actions = get_all_actions_documentation()
+        doc_data = {
+            "actions": actions,
+            "generated_date": str(__import__('datetime').datetime.now().date()),
+            "total_actions": len(actions)
+        }
+        if args.generate_docs:
+            with open("action_documentation_data.json", "w", encoding="utf-8") as f:
+                json.dump(doc_data, f, indent=2, ensure_ascii=False)
+            print("Documentation data written to action_documentation_data.json")
+    if args.generate_html:
+        import json
+        # Use doc_data from above if available, else load from JSON file
+        try:
+            if 'doc_data' not in locals():
+                with open("action_documentation_data.json", "r", encoding="utf-8") as f:
+                    doc_data = json.load(f)
+            template_path = "action_documentation_template.html"
+            output_path = "action_documentation.html"
+            with open(template_path, "r", encoding="utf-8") as f:
+                template = f.read()
+            js = "const DOCUMENTATION_DATA = " + json.dumps(doc_data, separators=(",", ":")) + ";\nif (typeof window.DOCUMENTATION_DATA_READY === 'function') window.DOCUMENTATION_DATA_READY();\n"
+            if "<!-- DOCUMENTATION_DATA_PLACEHOLDER -->" in template:
+                injected = template.replace("<!-- DOCUMENTATION_DATA_PLACEHOLDER -->", js)
+            else:
+                injected = template.replace("<script>", "<script>\n" + js + "\n", 1)
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(injected)
+            print(f"HTML documentation written to {output_path}")
+        except Exception as e:
+            print(f"Error generating HTML documentation: {e}")

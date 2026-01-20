@@ -11,7 +11,8 @@ actions:
   - position_click
   category: AI
 - command: ai_fix_yaml_copy_paste
-  description: Fix YAML formatting from copy-pasted content
+  description: "Fix YAML formatting from copy-pasted content\n    Prefers file_source/file_destination\
+    \ if available."
   variables:
   - file_input
   - file_output
@@ -74,10 +75,11 @@ actions:
   - log_url
   category: Chat
 - command: convert_svg_to_pdf
-  description: Convert SVG file to PDF format
+  description: "Convert SVG file to PDF format\n    Prefers file_source/file_destination\
+    \ if available."
   variables:
-  - file_input
-  - file_output
+  - file_source
+  - file_destination
   category: File
 - command: corel_add_text
   description: Add text in CorelDRAW
@@ -118,7 +120,8 @@ actions:
   variables: []
   category: Corel
 - command: corel_export
-  description: Export file from CorelDRAW
+  description: "Export file from CorelDRAW\n    Prefers file_destination if available,\
+    \ otherwise uses file_name for backward compatibility."
   variables:
   - file_name
   - file_destination
@@ -130,7 +133,8 @@ actions:
   variables: []
   category: Corel
 - command: corel_import
-  description: Import file into CorelDRAW
+  description: "Import file into CorelDRAW\n    Prefers file_source if available,\
+    \ otherwise uses file_name for backward compatibility."
   variables:
   - file_name
   - file_source
@@ -148,7 +152,8 @@ actions:
   - order
   category: Corel
 - command: corel_open
-  description: Open file in CorelDRAW
+  description: "Open file in CorelDRAW\n    Prefers file_source if available, otherwise\
+    \ uses file_name for backward compatibility."
   variables:
   - file_name
   - file_source
@@ -172,7 +177,8 @@ actions:
   - file_name
   category: Corel
 - command: corel_save_as
-  description: Save file with new name in CorelDRAW
+  description: "Save file with new name in CorelDRAW\n    Prefers file_destination\
+    \ if available, otherwise uses file_name for backward compatibility."
   variables:
   - file_name
   - file_destination
@@ -208,7 +214,8 @@ actions:
   - corner_smoothness
   category: Corel
 - command: corel_trace_full
-  description: Complete trace workflow in CorelDRAW
+  description: "Complete trace workflow in CorelDRAW\n    Prefers file_source/file_destination\
+    \ if available, otherwise uses file_input/file_output for backward compatibility."
   variables:
   - file_source
   - file_source_trace

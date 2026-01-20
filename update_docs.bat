@@ -9,7 +9,7 @@ echo.
 echo Generating documentation...
 echo.
 
-python oomlout_ai_roboclick.py --generate_docs
+    python oomlout_ai_roboclick.py --generate_docs --generate_html
 
 if %ERRORLEVEL% EQU 0 (
     echo.
