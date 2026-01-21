@@ -363,7 +363,9 @@ def ai_add_image(**kwargs):
     #kwargs["position_click"] = [750,995]
 
     action = kwargs.get("action", {})
-    file_name = action.get("file_name", "working.png")
+    file_name = action.get("file_source", "")
+    if file_name == "":
+        file_name = action.get("file_name", "working.png")
     directory_absolute = kwargs.get("directory_absolute", "")
     file_name_absolute = os.path.join(directory_absolute, file_name)
     file_name_abs = os.path.abspath(file_name) 
@@ -495,6 +497,7 @@ def ai_new_chat(**kwargs):
     #robo.robo_keyboard_press_enter(delay=40)
     #control enter
     robo.robo_keyboard_press_ctrl_generic(string="enter", delay=40)
+
     #if log_url is True:
     if log_url:
         #press ctrl l
@@ -621,6 +624,100 @@ def ai_set_mode(**kwargs):
         robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
         print("     AI mode set to deep research")
 
+#ai_skill_validate_json #file_source #file_dstination
+@action("ai_skill_validate_json", ["file_source", "file_destination"])
+def ai_skill_validate_json(**kwargs):
+    """Validate and fix JSON content using AI."""
+    action = kwargs.get("action", {})
+    file_input = action.get("file_source", None)
+    if not file_input:
+        file_input = action.get("file_input", "data.json")
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", "data_fixed.json")
+    directory = kwargs.get("directory", "")
+    
+    p3 = copy.deepcopy(kwargs)
+    action ={}
+    action["description"] = "Validate and fix JSON content using strict JSON rules."
+    action["log_url"] = False
+    p3["action"] = action
+    ai_new_chat(**p3)
+
+    #load input file
+    p3 = copy.deepcopy(kwargs)
+    action = p3.get("action", {})
+    action["file_source"] = file_input
+    p3["action"] = action
+    ai_add_file(**p3)
+
+    #create prompt
+    p3 = copy.deepcopy(kwargs)
+    action = {}
+    action["text"] = f"""YOU ARE: A strict JSON Validator + Auto-Repair Bot.
+
+GOAL:
+You will receive a JSON file/content that may contain errors. Your job is to:
+1) Validate it as STRICT JSON (RFC 8259).
+2) If invalid, repair it with the smallest possible edits.
+3) Re-validate and repeat until there are ZERO JSON syntax errors.
+4) Output ONLY the final validated JSON, wrapped between the exact tags:
+<<<tag to copy>>>
+...json...
+<<<tag to copy>>>
+
+ABSOLUTE OUTPUT RULES:
+- Output NOTHING except the validated JSON between the two <<<tag to copy>>> tags.
+- No explanations, no bullet points, no notes, no analysis, no extra whitespace outside the tags.
+- The final output must be STRICT JSON (no trailing commas, no comments, no JSON5 features).
+- Use double quotes ONLY where JSON requires them (keys and string delimiters).
+- IMPORTANT: Remove problematic double-quote characters used as inches marks inside string values.
+  - If you detect inch notation like 3'9" or 4'0" inside a string, you MUST remove/replace the " character so it cannot break JSON.
+  - Prefer replacement rules (choose the minimal change that preserves meaning):
+    - Replace 3'9" → 3'9 in
+    - Replace 4'0" → 4'0 in
+    - Or replace with words: 3 ft 9 in, 4 ft 0 in (only if needed for clarity)
+  - DO NOT escape the inches quote as \" (the user wants quotes removed, not escaped).
+- Preserve the original structure and key order as much as possible; only change what is required to make it valid JSON.
+
+VALIDATION / REPAIR LOOP (do not skip):
+1) Attempt to parse the entire input as strict JSON.
+2) If parsing fails:
+   - Identify the earliest syntax-breaking issue (e.g., unescaped quote, missing comma, mismatched brace/bracket, invalid control character).
+   - Apply the minimal edit to fix it.
+   - Pay special attention to stray " inside strings (especially feet/inches patterns).
+3) Re-parse from scratch.
+4) Repeat until parsing succeeds with zero errors.
+
+NORMALIZATION (after it parses successfully):
+- Ensure consistent indentation (2 spaces).
+- Ensure all strings are properly delimited.
+- Ensure there is exactly one top-level JSON value (object or array).
+- Do not add or remove fields unless required for syntactic validity.
+
+INPUT:
+Paste the JSON content now (raw text). Begin repair + validation immediately.
+"""
+    action["delay"] = 240
+    action["method"] = "paste"
+    p3["action"] = action
+    ai_query(**p3)  
+
+    #ai_copy_text
+    p3 = copy.deepcopy(kwargs)
+    action = {}
+    
+    action["file_name_full"] = f"{file_output}.full_text.txt"
+    action["file_name_clip"] = file_output
+    action["clip"] = "<<<tag to copy>>>"
+    p3["action"] = action
+    ai_save_text(**p3)
+
+    #browser_close_tab
+    p3 = copy.deepcopy(kwargs)
+    action = {}
+    p3["action"] = action
+    browser_close_tab(**p3)
 
 # browser
 
