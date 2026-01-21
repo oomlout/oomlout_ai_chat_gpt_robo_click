@@ -662,12 +662,12 @@ You will receive a JSON file/content that may contain errors. Your job is to:
 2) If invalid, repair it with the smallest possible edits.
 3) Re-validate and repeat until there are ZERO JSON syntax errors.
 4) Output ONLY the final validated JSON, wrapped between the exact tags:
-<<<tag to copy>>>
+&&&tag for copy&&&
 ...json...
-<<<tag to copy>>>
+&&&tag for copy&&&
 
 ABSOLUTE OUTPUT RULES:
-- Output NOTHING except the validated JSON between the two <<<tag to copy>>> tags.
+- Output NOTHING except the validated JSON between the two &&&tag for copy&&& tags.
 - No explanations, no bullet points, no notes, no analysis, no extra whitespace outside the tags.
 - The final output must be STRICT JSON (no trailing commas, no comments, no JSON5 features).
 - Use double quotes ONLY where JSON requires them (keys and string delimiters).
@@ -709,7 +709,7 @@ Paste the JSON content now (raw text). Begin repair + validation immediately.
     
     action["file_name_full"] = f"{file_output}.full_text.txt"
     action["file_name_clip"] = file_output
-    action["clip"] = "<<<tag to copy>>>"
+    action["clip"] = "&&&tag for copy&&&"
     p3["action"] = action
     ai_save_text(**p3)
 
