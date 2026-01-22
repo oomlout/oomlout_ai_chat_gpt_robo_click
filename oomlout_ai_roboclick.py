@@ -1675,7 +1675,7 @@ def wait_for_file(**kwargs):
             if os.path.exists(f):
                 print(f"File found: {f}")
                 return f
-        robo.robo_delay(delay=interval)
+        #robo.robo_delay(delay=interval)
         elapsed += interval
     print("Timeout waiting for files.")
     return None
