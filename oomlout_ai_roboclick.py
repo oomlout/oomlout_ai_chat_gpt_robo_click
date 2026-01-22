@@ -582,7 +582,7 @@ def ai_save_text(**kwargs):
     file_name_full = action.get("file_name_full", "text.txt")
     file_name_clip = action.get("file_name_clip", "clip.txt")
     
-    clip = action.get("clip", " ")
+    clip = action.get("clip", "&&&tag for copy&&&")
     directory = kwargs.get("directory", "")
 
     robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
@@ -795,15 +795,34 @@ def convert_svg_to_pdf(**kwargs):
     action = kwargs.get("action", {})
     file_input = action.get("file_source", None)
     if not file_input:
+        file_input = action.get("file_input", "")    
+    kwargs["file_input"] = f"{directory}\{file_input}"
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", "")
+    if file_output == "":
+        file_output = file_input.replace(".svg", ".pdf")    
+    kwargs["file_output"] = f"{directory}\{file_output}"
+    robo.robo_convert_svg_to_pdf(**kwargs)
+
+@action("convert_svg_to_png", ["file_source", "file_destination"])
+def convert_svg_to_png(**kwargs):
+    """Convert SVG file to PNG format."""
+    directory = kwargs.get("directory", "")
+    action = kwargs.get("action", {})
+    file_input = action.get("file_source", None)
+    if not file_input:
         file_input = action.get("file_input", "")
     kwargs["file_input"] = f"{directory}\{file_input}"
     file_output = action.get("file_destination", None)
     if not file_output:
         file_output = action.get("file_output", "")
     if file_output == "":
-        file_output = file_input.replace(".svg", ".pdf")
+        file_output = file_input.replace(".svg", ".png")
     kwargs["file_output"] = f"{directory}\{file_output}"
     robo.robo_convert_svg_to_pdf(**kwargs)
+
+
 
 ##### corel commands
 
@@ -1635,7 +1654,7 @@ def save_image_search_result(**kwargs):
         robo.robo_keyboard_press_escape(delay=5, repeat=5)
         print(f"Image saved as {file_name}")
 
-@action("text_jinja_template", ["file_template", "file_source", "file_output", "search_and_replace", "convert_to_pdf", "convert_to_png"])
+@action("text_jinja_template", ["file_template", "file_source", "file_output", "search_and_replace", "convert_to_pdf", "convert_to_png", "dict_data"])
 def text_jinja_template(**kwargs):
     """Process text using Jinja template."""
     action = kwargs.get("action", {})
@@ -1654,8 +1673,14 @@ def text_jinja_template(**kwargs):
     if action.get("convert_to_pdf", False):
         kwargs2 = copy.deepcopy(kwargs)
         kwargs2["file_input"] = kwargs["file_output"]
-        kwargs2["file_output"] = kwargs["file_output"].replace(".txt", ".pdf")
-        convert_svg_to_pdf(**kwargs2)
+        kwargs2.pop("file_output")
+        robo.robo_convert_svg_to_pdf(**kwargs2)
+    if action.get("convert_to_png", False):
+        kwargs2 = copy.deepcopy(kwargs)
+        kwargs2["file_input"] = kwargs["file_output"]
+        kwargs2.pop("file_output")
+        robo.robo_convert_svg_to_png(**kwargs2)
+    pass
 
 @action("wait_for_file", ["file_name", "file_name_1", "file_name_2", "file_name_3", "file_name_4", "file_name_5", "file_name_6"])
 def wait_for_file(**kwargs):
@@ -1720,6 +1745,24 @@ def openscad_render(**kwargs):
 
 
 ##### utility stuff
+def get_url(part):
+    file_url = "url.yaml"
+    directory = get_directory(part)
+    file_url = f"{directory}\\url.yaml"
+    import yaml
+    url = ""
+    if os.path.isfile(file_url):
+        #url may have multiple lines use the last one
+        with open(file_url, 'r', encoding='utf-8') as f:
+            try:
+                data_list = yaml.safe_load(f)
+                url = data_list[len(data_list)-1]
+            except Exception as e:
+                print(f"Error reading url from {file_url}: {e}")
+    return url
+                
+            
+
 def get_directory(part):
     
     #type, size, color, description_main, description_extra
