@@ -624,6 +624,24 @@ def ai_set_mode(**kwargs):
         robo.robo_keyboard_press_enter(delay=2)  # Press enter to confirm the mode
         print("     AI mode set to deep research")
 
+#ai_skill_text_to_speech
+@action("ai_skill_text_to_speech", ["text", "file_destination"])
+def ai_skill_text_to_speech(**kwargs):
+    """Convert text to speech using AI."""
+    action = kwargs.get("action", {})
+    text = action.get("text", "")
+    file_output = action.get("file_destination", None)
+    if not file_output:
+        file_output = action.get("file_output", "output_audio.mp3")
+    directory = kwargs.get("directory", "")
+    
+    url_text_to_speech_dia = "http:\\192.168.1.231:52000"
+    p3 = copy.deepcopy(kwargs)
+    action ={}
+    action["command"] = "browser_open_url"
+
+
+
 #ai_skill_validate_json #file_source #file_dstination
 @action("ai_skill_validate_json", ["file_source", "file_destination"])
 def ai_skill_validate_json(**kwargs):
