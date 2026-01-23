@@ -951,7 +951,7 @@ def corel_group(**kwargs):
     robo.robo_corel_group(**kwargs)
 
 
-@action("corel_import", ["file_source", "x", "y", "width", "height", "max_dimension", "angle", "special"])
+@action("corel_import", ["file_source", "x", "y", "width", "height", "max_dimension", "angle", "special, 'no double click' - to deal with non square objects"])
 def corel_import(**kwargs):
     """Import file into CorelDRAW."""
     action = kwargs.get("action", {})
@@ -1710,7 +1710,7 @@ def wait_for_file(**kwargs):
         #robo.robo_delay(delay=interval)
         elapsed += interval
     print("Timeout waiting for files.")
-    return None
+    return "exit"
 
 #openscad
 @action("openscad_render", ["file_source", "file_destination", "render_type", "delay"])
