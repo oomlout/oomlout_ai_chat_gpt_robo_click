@@ -1535,20 +1535,27 @@ def image_quad_swap_for_tile(**kwargs):
 
 # Restored retired and missing actions from old version
 
-@action("image_upscale", ["file_input", "file_output", "upscale_factor", "crop"])
+@action("image_upscale", ["file_source", "file_destination", "scale", "crop"])
 def image_upscale(**kwargs):
     """Upscale image resolution."""
     action = kwargs.get("action", {})
     directory = kwargs.get("directory", "")
-    file_input = action.get("file_input", "")
+    file_input = action.get("file_source", "")
+    if file_input == "":
+        file_input = action.get("file_input", "")
     file_input = os.path.join(directory, file_input)
     file_input_full = os.path.abspath(file_input)
     file_output_default = file_input.replace(".png", "_upscaled.png").replace(".jpg", "_upscaled.jpg").replace(".jpeg", "_upscaled.jpeg")
-    file_output = action.get("file_output", file_output_default)
+    file_output = action.get("file_destination", file_output_default)
+    if file_output == "":
+        file_output = action.get("file_output", file_output_default)
     file_output_base = file_output
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
-    upscale_factor = int(action.get("upscale_factor", 2))
+    upscale_factor = float(action.get("scale", ""))
+                                      
+    if upscale_factor == "":
+        upscale_factor = float(action.get("upscale_factor", 2))
     crop = action.get("crop", "")
     if os.path.isfile(file_input):
         from PIL import Image
