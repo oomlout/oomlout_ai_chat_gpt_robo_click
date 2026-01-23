@@ -695,10 +695,12 @@ NORMALIZATION (after it parses successfully):
 - Ensure there is exactly one top-level JSON value (object or array).
 - Do not add or remove fields unless required for syntactic validity.
 
+**IMPORTANT HINT*** Sometimes the data will have a height as 4'10" format, fix this by replacing the " for inches with in first then try to fix the errors
+
 INPUT:
 Paste the JSON content now (raw text). Begin repair + validation immediately.
 """
-    action["delay"] = 240
+    action["delay"] = 360
     action["method"] = "paste"
     p3["action"] = action
     ai_query(**p3)  
