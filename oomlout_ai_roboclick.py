@@ -486,6 +486,15 @@ def ai_new_chat(**kwargs):
     log_url = kwargs.get("log_url", True)
     print("new_chat -- opening up a new chat")
     robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
+    #check for hitting limit
+    if True:
+        print("    Checking for message limit...")
+        clip = robo.robo_keyboard_copy(delay=5, position=[300, 300])  # Copy some text to check for limit
+        if "0 messages remaining" in clip.lower():
+            print("    Hit message limit, cannot proceed.")
+            #delay 6 hours
+            print("    Delaying for 6 hours before retrying...")
+            robo.robo_delay(delay=21600)  # Delay for 6 hours
     #type in start query
     start_query = ""
     if description != "":        
