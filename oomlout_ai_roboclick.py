@@ -728,6 +728,7 @@ INPUT:
 Paste the JSON content now (raw text). Begin repair + validation immediately.
 """
     action["delay"] = 360
+    action["mode_ai_wait"] = "fast_button_state"
     action["method"] = "paste"
     p3["action"] = action
     ai_query(**p3)  
@@ -1581,10 +1582,11 @@ def image_upscale(**kwargs):
     file_output_base = file_output
     if directory not in file_output:
         file_output = os.path.join(directory, file_output)
-    upscale_factor = float(action.get("scale", ""))
+    upscale_factor = action.get("scale", "")
                                       
     if upscale_factor == "":
         upscale_factor = float(action.get("upscale_factor", 2))
+    upscale_factor = float(upscale_factor)
     crop = action.get("crop", "")
     if os.path.isfile(file_input):
         from PIL import Image
