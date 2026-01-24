@@ -494,7 +494,8 @@ def ai_new_chat(**kwargs):
             print("    Hit message limit, cannot proceed.")
             #delay 6 hours
             print("    Delaying for 6 hours before retrying...")
-            robo.robo_delay(delay=21600)  # Delay for 6 hours
+            robo.robo_delay(delay=45)  # Delay for 6 hours
+            return "exit"
     #type in start query
     start_query = ""
     if description != "":        
