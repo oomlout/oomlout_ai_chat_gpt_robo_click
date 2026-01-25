@@ -494,7 +494,7 @@ def ai_new_chat(**kwargs):
             print("    Hit message limit, cannot proceed.")
             #delay 6 hours
             print("    Delaying for 6 hours before retrying...")
-            robo.robo_delay(delay=45)  # Delay for 6 hours
+            robo.robo_delay(delay=21600)  # Delay for 6 hours
             return "exit"
     #type in start query
     start_query = ""
@@ -792,6 +792,16 @@ def continue_chat(**kwargs):
     url_chat = action.get("url_chat", "")
     print("continue_chat -- continuing an existing chat")
     robo.robo_chrome_open_url(url=url_chat, delay=15, message="    opening a new chat")    
+    #check for hitting limit
+    if True:
+        print("    Checking for message limit...")
+        clip = robo.robo_keyboard_copy(delay=5, position=[300, 300])  # Copy some text to check for limit
+        if "0 messages remaining" in clip.lower():
+            print("    Hit message limit, cannot proceed.")
+            #delay 6 hours
+            print("    Delaying for 6 hours before retrying...")
+            robo.robo_delay(delay=21600)  # Delay for 6 hours
+            return "exit"
     #if log_url is True:
     if log_url:
         #press ctrl l
