@@ -1856,13 +1856,36 @@ def save_image_generated_old_press_down_40_time_approach(**kwargs):
     if True:
         #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)
         #click on the image to focus
-        robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
-        #click on the image to focus
-        #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
-        robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
-        #robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
-        robo.robo_keyboard_press_down(delay=1, repeat=40)  # Press down ten times to select the file input
-        save_image(**kwargs)
+        #reload
+        if True:
+            robo.robo_keyboard_press_ctrl_generic(string="r", delay=20)
+            #click on the image to focus
+            #robo.robo_mouse_click(position=[330,480], delay=2)  # Click on the white space
+            robo.robo_mouse_click(position=[330,360], delay=2)  # Click on the white space
+            #robo.robo_mouse_click(position=[330,280], delay=2)  # Click on the white space
+            robo.robo_keyboard_press_down(delay=1, repeat=40)  # Press down ten times to select the file input
+        #check if limit reached
+        if True:
+            clip = robo.robo_keyboard_copy(delay=2)
+            if "you've hit the plus plan limit" in clip.lower() or "you have reached your free image generation limit" in clip.lower() or "you've reached your image creation limit" in clip.lower():   
+                #get text bewteen "resets in" and  minutes
+                time_out = clip.lower().split("resets in")[-1].split("minutes")[0].strip()
+                #check to make sure it worked
+                delay_time  = 6 * 60 * 60 # 6 hours
+                if time_out != "":
+                    #get hours
+                    if "hour" in time_out:
+                        hours = int(time_out.split("hour")[0].strip()) + 1
+                        delay_time = hours * 60 * 60
+                    #print message
+                    print(f"Image generation limit reached, waiting for {delay_time/3600:.2f} hours until reset...")
+                robo.robo_delay(delay=delay_time)
+
+
+                return "exit"
+        #save image        
+        if True:
+            save_image(**kwargs)
         file_name = kwargs.get("action", {}).get("file_name", "working.png")
         file_name_absolute = os.path.join(kwargs.get("directory_absolute", ""), file_name)
         if os.path.exists(file_name_absolute):
