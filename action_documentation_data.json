@@ -32,7 +32,8 @@
       "description": "Add a file (alias for add_image)",
       "variables": [
         "file_source",
-        "position_click"
+        "position_click",
+        "mode -- source_files from source_files directory"
       ],
       "category": "AI"
     },
@@ -80,7 +81,7 @@
     },
     {
       "command": "ai_save_text",
-      "description": "Save text content from AI",
+      "description": "Save text content from AI default between &&&tag for copy&&&",
       "variables": [
         "file_name_full",
         "file_name_clip",
@@ -93,6 +94,24 @@
       "description": "Set AI mode (e.g., deep_research)",
       "variables": [
         "mode"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_skill_text_to_speech",
+      "description": "Convert text to speech using AI.",
+      "variables": [
+        "text",
+        "file_destination"
+      ],
+      "category": "AI"
+    },
+    {
+      "command": "ai_skill_validate_json",
+      "description": "Validate and fix JSON content using AI.",
+      "variables": [
+        "file_source",
+        "file_destination"
       ],
       "category": "AI"
     },
@@ -144,6 +163,15 @@
         "file_destination"
       ],
       "category": "File"
+    },
+    {
+      "command": "convert_svg_to_png",
+      "description": "Convert SVG file to PNG format.",
+      "variables": [
+        "file_source",
+        "file_destination"
+      ],
+      "category": "Other"
     },
     {
       "command": "corel_add_text",
@@ -226,7 +254,7 @@
         "height",
         "max_dimension",
         "angle",
-        "special"
+        "special, 'no double click' - to deal with non square objects"
       ],
       "category": "Corel"
     },
@@ -363,6 +391,16 @@
       "category": "File"
     },
     {
+      "command": "google_doc_add_text",
+      "description": "Add text to a Google Doc at specified position.",
+      "variables": [
+        "url",
+        "text",
+        "position"
+      ],
+      "category": "Google Doc"
+    },
+    {
       "command": "google_doc_new",
       "description": "Create a new Google Doc and return its URL",
       "variables": [
@@ -404,9 +442,9 @@
       "command": "image_upscale",
       "description": "Upscale image resolution.",
       "variables": [
-        "file_input",
-        "file_output",
-        "upscale_factor",
+        "file_source",
+        "file_destination",
+        "scale",
         "crop"
       ],
       "category": "Image"
@@ -484,7 +522,8 @@
         "file_output",
         "search_and_replace",
         "convert_to_pdf",
-        "convert_to_png"
+        "convert_to_png",
+        "dict_data"
       ],
       "category": "Other"
     },
@@ -503,6 +542,6 @@
       "category": "Other"
     }
   ],
-  "generated_date": "2026-01-20",
-  "total_actions": 50
+  "generated_date": "2026-01-28",
+  "total_actions": 54
 }

@@ -265,7 +265,21 @@ def run_single(**kwargs):
                 return
         if True:
             workings = kwargs.get("workings", {})
-
+        #add worning_manual values
+        if True:
+            file_action_manual = file_action.replace(".yaml", "_manual.yaml")
+            if os.path.exists(file_action_manual):
+                print(f"loading manual configuration from {file_action_manual}")
+                try:
+                    with open(file_action_manual, 'r') as file:
+                        workings_manual = yaml.safe_load(file)
+                        print(f"Manual configuration loaded from {file_action_manual}: {len(workings_manual)}")
+                        for key, value in workings_manual.items():
+                            workings[key] = value
+                except FileNotFoundError:
+                    print(f"Manual configuration file {file_action_manual} not found.")
+                except yaml.YAMLError as e:
+                    print(f"Error parsing YAML file {file_action_manual}: {e}")
 
         base = workings.get(mode, [])
         if base != []:
@@ -310,17 +324,24 @@ def run_single(**kwargs):
             break
         #if result is a dict
         elif isinstance(result, dict):
+            file_action_manual = file_action.replace(".yaml", "_manual.yaml")
+            details = {}
+            #laod file_action_manual as yaml if it exists
+            if os.path.exists(file_action_manual):
+                with open(file_action_manual, 'r') as file:
+                    details = yaml.safe_load(file)
             print ("Updating workings with result dict")
             for key, value in result.items():
-                workings[key] = value
+                details[key] = value
                 print(f"    Updated workings key: {key} with value: {value}")
             #write kwargs to file_action
-            try:
-                with open(file_action, 'w') as file:
-                    yaml.dump(workings, file)
-                    print(f"Updated workings saved to {file_action}")
+            
+            try:                                
+                with open(file_action_manual, 'w') as file:
+                    yaml.dump(details, file)
+                    print(f"Updated workings saved to {file_action_manual}")
             except Exception as e:
-                print(f"Error saving workings to {file_action}: {e}")
+                print(f"Error saving workings to {file_action_manual}: {e}")
                 import time
                 time.sleep(5)
             
@@ -354,7 +375,7 @@ def run_action(**kwargs):
 
 
 ###ai ones
-@action("ai_add_image", ["file_source", "position_click"])
+@action("ai_add_image", ["file_source", "position_click", "mode -- source_files from source_files directory"])
 def ai_add_image(**kwargs):
     """Add a file (alias for add_image)"""
     """Add an image file to the current context"""
@@ -366,9 +387,19 @@ def ai_add_image(**kwargs):
     file_name = action.get("file_source", "")
     if file_name == "":
         file_name = action.get("file_name", "working.png")
-    directory_absolute = kwargs.get("directory_absolute", "")
-    file_name_absolute = os.path.join(directory_absolute, file_name)
-    file_name_abs = os.path.abspath(file_name) 
+    directory = kwargs.get("directory", "")
+    directory_absolute = os.path.abspath(directory)
+    
+    action = kwargs.get("action", {})
+    mode = action.get("mode", "")
+    if mode == "":    
+        file_name_absolute = os.path.join(directory_absolute, file_name)
+        file_name_abs = os.path.abspath(file_name) 
+    if mode == "source_files":
+        file_name_absolute = os.path.join(os.path.abspath("source_files"), file_name)
+        file_name_abs = os.path.abspath(file_name)
+        pass
+    
     #print(f"Adding image {file_name} at position {position_click}")
     #test if filename exists
     if not os.path.exists(file_name_absolute):
@@ -556,6 +587,11 @@ def ai_query(**kwargs):
         #back space
         robo.robo_keyboard_press_backspace(delay=2, repeat=1)
 
+    #if query text is more than 1000 characters use paste method
+    if len(query_text) > 1000:
+        method = "paste"
+        print("    Query text is long, using paste method.")
+
     if method == "typing":
         #split the text on line breaks
         query_text = query_text.replace("\r\n", "\n").replace("\r", "\n")
@@ -587,16 +623,23 @@ def ai_query(**kwargs):
 
 @action("ai_save_text", ["file_name_full", "file_name_clip", "clip"])
 def ai_save_text(**kwargs):
-    """Save text content from AI"""
+    """Save text content from AI default between &&&tag for copy&&&"""
     action = kwargs.get("action", {})
+    remove_double_line_breaks = action.get("remove_double_line_breaks", True)
     file_name_full = action.get("file_name_full", "text.txt")
-    file_name_clip = action.get("file_name_clip", "clip.txt")
+    file_name_clip = action.get("file_name_clip", "")
+    if file_name_clip == "":
+        file_name_full = action.get("file_name", "")
+        if file_name_full == "":
+            file_name_full = action.get("file_destination", "clip.txt")
+    
     
     clip = action.get("clip", "&&&tag for copy&&&")
     directory = kwargs.get("directory", "")
 
     robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
     text = robo.robo_keyboard_copy(delay=2)  # Copy the selected text
+
     if file_name_full != "":
         file_name_full_full = os.path.join(directory, file_name_full)
         with open(file_name_full_full, 'w', encoding='utf-8') as f:
@@ -611,6 +654,9 @@ def ai_save_text(**kwargs):
                 clipping = clipping[len(clipping)-2]
             else:
                 clipping = text
+            if remove_double_line_breaks:
+                clipping = clipping.replace("\n\n", "\n")
+                clipping = clipping.replace("\n\n", "\n")
             f.write(clipping)
             print(f"Clip text saved to {file_name_clip_full}")
 
@@ -1375,6 +1421,7 @@ def google_doc_new(**kwargs):
     template = action.get("template", "")
     title = action.get("title", "")
     folder = action.get("folder", "")
+    save_to_file = action.get("save_to_file", True)
     print("google_doc_new -- creating a new Google Doc")
     
     kwargs2 = copy.deepcopy(kwargs)
@@ -1387,8 +1434,48 @@ def google_doc_new(**kwargs):
     
     result = robo.robo_google_doc_new(**kwargs2)
     
+    file_name = action.get("file_name", "google_doc_url.txt")
+    directory = kwargs.get("directory", "")
+    if save_to_file:
+        file_name_full = os.path.join(directory, file_name)
+        url = result.get("url_google_doc", "")
+        try:
+            with open(file_name_full, 'w', encoding='utf-8') as f:
+                f.write(url)
+            print(f"Google Doc URL saved to {file_name_full}")
+        except Exception as e:
+            print(f"Error saving Google Doc URL to {file_name_full}: {e}")
+
     return result
 
+
+@action("google_doc_add_text", ["url", "text", "position"])
+def google_doc_add_text(**kwargs):
+    """Add text to a Google Doc at specified position. file to source defaults to /google_doc_url.txt if url is not provided."""
+    action = kwargs.get("action", {})
+    url = action.get("url", "")
+    text = action.get("text", "")
+    position = action.get("position", "end")
+
+    #if yurl is "" load it from directory/google_doc_url.txt
+    if url == "":
+        directory = kwargs.get("directory", "")
+        file_name_full = os.path.join(directory, "google_doc_url.txt")
+        try:
+            with open(file_name_full, 'r', encoding='utf-8') as f:
+                url = f.read().strip()
+            print(f"Google Doc URL loaded from {file_name_full}")
+        except Exception as e:
+            print(f"Error loading Google Doc URL from {file_name_full}: {e}")
+            return
+
+    print(f"google_doc_add_text -- adding text to Google Doc at {url}")
+    kwargs2 = copy.deepcopy(kwargs)
+    kwargs2["url"] = url
+    kwargs2["text"] = text
+    kwargs2["position"] = position
+    robo.robo_google_doc_add_text(**kwargs2)    
+    
 
 @action("image_crop", ["file_source", "file_destination", "crop"])
 def image_crop(**kwargs):
