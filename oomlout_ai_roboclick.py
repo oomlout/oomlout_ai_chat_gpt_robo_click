@@ -1075,7 +1075,7 @@ def corel_import(**kwargs):
 
 @action("corel_object_order", ["order"])
 def corel_object_order(**kwargs):
-    """Change object stacking order in CorelDRAW"""
+    """Change object stacking order in CorelDRAW, order to_front to_back"""
     print("corel_object_order -- changing object order in corel")
     action = kwargs.get("action", {})
     order = action.get("order", "to_front")
@@ -1131,27 +1131,23 @@ def corel_paste(**kwargs):
     robo.robo_corel_paste(**kwargs2)
 
 
-@action("corel_save", ["file_source"])
+@action("corel_save")
 def corel_save(**kwargs):
     """Save current file in CorelDRAW."""
     action = kwargs.get("action", {})
     # Use file_source when available
-    file_name = action.get("file_source", None)
-    if not file_name:
-        file_name = action.get("file_name", "")
     kwargs2 = copy.deepcopy(kwargs)
-    kwargs2["file_name"] = file_name
     robo.robo_corel_save(**kwargs2)
 
 
-@action("corel_save_as", ["file_source", "file_destination"])
+@action("corel_save_as", ["file_name"])
 def corel_save_as(**kwargs):
     """Save file with new name in CorelDRAW."""
     action = kwargs.get("action", {})
     # Use file_source when available
-    file_name = action.get("file_source", None)
-    if not file_name:
-        file_name = action.get("file_name", "")
+    file_name = action.get("file_name", "")
+    if file_name == "":
+        file_name = action.get("file_source", "")
     if file_name == "":
         file_name = action.get("file_destination", "")
     kwargs2 = copy.deepcopy(kwargs)
