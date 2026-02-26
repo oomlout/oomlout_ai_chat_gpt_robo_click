@@ -273,9 +273,10 @@ def run_single(**kwargs):
                 try:
                     with open(file_action_manual, 'r') as file:
                         workings_manual = yaml.safe_load(file)
-                        print(f"Manual configuration loaded from {file_action_manual}: {len(workings_manual)}")
-                        for key, value in workings_manual.items():
-                            workings[key] = value
+                        if workings_manual != None:
+                            print(f"Manual configuration loaded from {file_action_manual}: {len(workings_manual)}")
+                            for key, value in workings_manual.items():
+                                workings[key] = value
                 except FileNotFoundError:
                     print(f"Manual configuration file {file_action_manual} not found.")
                 except yaml.YAMLError as e:
@@ -331,9 +332,10 @@ def run_single(**kwargs):
                 with open(file_action_manual, 'r') as file:
                     details = yaml.safe_load(file)
             print ("Updating workings with result dict")
-            for key, value in result.items():
-                details[key] = value
-                print(f"    Updated workings key: {key} with value: {value}")
+            if details != None:
+                for key, value in result.items():
+                    details[key] = value
+                    print(f"    Updated workings key: {key} with value: {value}")
             #write kwargs to file_action
             
             try:                                
@@ -1461,6 +1463,7 @@ def google_doc_add_text(**kwargs):
     action = kwargs.get("action", {})
     url = action.get("url", "")
     text = action.get("text", "")
+    method = action.get("method", "type")
     position = action.get("position", "end")
 
     #if yurl is "" load it from directory/google_doc_url.txt
@@ -1480,6 +1483,7 @@ def google_doc_add_text(**kwargs):
     kwargs2["url"] = url
     kwargs2["text"] = text
     kwargs2["position"] = position
+    kwargs2["method"] = method
     robo.robo_google_doc_add_text(**kwargs2)    
     
 
