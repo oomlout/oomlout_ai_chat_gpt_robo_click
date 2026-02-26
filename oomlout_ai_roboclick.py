@@ -516,7 +516,7 @@ def ai_new_chat(**kwargs):
     """Open new chat session"""
     action = kwargs.get("action", {})
     description = action.get("description", "")
-    log_url = kwargs.get("log_url", True)
+    log_url = action.get("log_url", True)
     print("new_chat -- opening up a new chat")
     robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
     #check for hitting limit
