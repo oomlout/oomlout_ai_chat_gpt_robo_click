@@ -310,7 +310,7 @@ def run_single(**kwargs):
             if not os.path.exists(file_test_absolute):
                 print(f"File test {file_test_absolute} does not exist, skipping actions.")
                 return
-
+    print(f"    file test passed, proceeding with actions.")
     result = ""
     
     kwargs = copy.deepcopy(kwargs)
@@ -578,6 +578,8 @@ def ai_query(**kwargs):
     delay = action.get("delay", 60)
     query_text = action.get("text", "")
     mode_ai = action.get("mode_ai_wait", "slow")
+    if mode_ai == None:
+        mode_ai = "slow"
     method = action.get("method", "typing")  #"standard" or "line_by_line"
 
 
@@ -691,6 +693,13 @@ def ai_skill_image_prompt_full(**kwargs):
     import oomlout_ai_roboclick_skill_image_intense_1
     return oomlout_ai_roboclick_skill_image_intense_1.main(**kwargs)
 
+
+#ai_skill_image_laser_cut_logo_full
+@action("ai_skill_image_laser_cut_logo_full", ["image_detail", "file_destination"])
+def ai_skill_image_laser_cut_logo_full(**kwargs):
+    """ make a laser cut logo image using AI."""
+    import oomlout_ai_roboclick_skill_image_laser_cut_logo_full_1
+    return oomlout_ai_roboclick_skill_image_laser_cut_logo_full_1.main(**kwargs)
 
 #ai_skill_text_to_speech
 @action("ai_skill_text_to_speech", ["text", "file_destination"])
@@ -1948,7 +1957,7 @@ def save_image_generated_old_press_down_40_time_approach(**kwargs):
         delay = random.randint(100, 300)
         robo.robo_delay(delay=delay)  # Wait for the image to be generated
     elif "fast" in mode_ai_wait:
-        ai_wait_mode_fast_check()
+        ai_wait_mode_fast_check(mode_ai_wait="fast_clipboard_state")
     
     if True:
         #send ctrl rrobo.robo_keyboard_press_ctrl_r(delay=20)

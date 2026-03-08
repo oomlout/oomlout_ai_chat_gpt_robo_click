@@ -98,6 +98,15 @@
       "category": "AI"
     },
     {
+      "command": "ai_skill_image_prompt_full",
+      "description": "make an image prompt using AI.",
+      "variables": [
+        "image_detail",
+        "file_destination"
+      ],
+      "category": "AI"
+    },
+    {
       "command": "ai_skill_text_to_speech",
       "description": "Convert text to speech using AI.",
       "variables": [
@@ -260,7 +269,7 @@
     },
     {
       "command": "corel_object_order",
-      "description": "Change object stacking order in CorelDRAW",
+      "description": "Change object stacking order in CorelDRAW, order to_front to_back",
       "variables": [
         "order"
       ],
@@ -296,17 +305,14 @@
     {
       "command": "corel_save",
       "description": "Save current file in CorelDRAW.",
-      "variables": [
-        "file_source"
-      ],
+      "variables": [],
       "category": "Corel"
     },
     {
       "command": "corel_save_as",
       "description": "Save file with new name in CorelDRAW.",
       "variables": [
-        "file_source",
-        "file_destination"
+        "file_name"
       ],
       "category": "Corel"
     },
@@ -392,7 +398,7 @@
     },
     {
       "command": "google_doc_add_text",
-      "description": "Add text to a Google Doc at specified position.",
+      "description": "Add text to a Google Doc at specified position. file to source defaults to /google_doc_url.txt if url is not provided.",
       "variables": [
         "url",
         "text",
@@ -542,6 +548,6 @@
       "category": "Other"
     }
   ],
-  "generated_date": "2026-01-28",
-  "total_actions": 54
+  "generated_date": "2026-02-26",
+  "total_actions": 55
 }
