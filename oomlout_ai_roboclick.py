@@ -219,7 +219,7 @@ def main(**kwargs):
                         mode = "oomlout_ai_roboclick"
                         kwargs["mode"] = mode
                         run_single(**kwargs)
-                        for i in range(1, 10):
+                        for i in range(1, 50):
                             mode = f"oomlout_ai_roboclick_{i}"
                             kwargs["mode"] = mode
                             run_single(**kwargs)
@@ -227,7 +227,7 @@ def main(**kwargs):
                         mode = "oomlout_corel_roboclick"
                         kwargs["mode"] = mode
                         run_single(**kwargs)
-                        for i in range(1, 10):
+                        for i in range(1, 50):
                             mode = f"oomlout_corel_roboclick_{i}"
                             kwargs["mode"] = mode
                             run_single(**kwargs)
