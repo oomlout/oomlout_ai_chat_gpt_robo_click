@@ -419,7 +419,7 @@ def ai_add_image(**kwargs):
     #enter once
     robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
     #new needs two enters maybe
-    if True:
+    if False:
         robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
     #robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
     robo.robo_keyboard_send(string=file_name_absolute, delay=5)  # Type the file name
@@ -568,6 +568,7 @@ def ai_new_chat(**kwargs):
     log_url = action.get("log_url", True)
     print("new_chat -- opening up a new chat")
     robo.robo_chrome_open_url(url="https://chat.openai.com/chat", delay=15, message="    opening a new chat")    
+    robo.ai_check_for_too_many_requests()
     #check for hitting limit
     if True:
         print("    Checking for message limit...")
@@ -589,7 +590,7 @@ def ai_new_chat(**kwargs):
     #robo.robo_keyboard_press_enter(delay=40)
     #control enter
     robo.robo_keyboard_press_ctrl_generic(string="enter", delay=40)
-
+    robo.ai_check_for_too_many_requests()
     #if log_url is True:
     if log_url:
         #press ctrl l
@@ -2036,6 +2037,7 @@ def ai_wait_mode_fast_clipboard_creating_image_approach():
             print("    AI appears to have finished responding.")
             running = False
             robo.robo_delay(delay=2)
+        robo.ai_check_for_too_many_requests()
 
 def ai_wait_mode_fast_check_state_of_submit_button_approach():  
     print("Waiting for AI to finish responding (fast mode)...")
@@ -2060,6 +2062,7 @@ def ai_wait_mode_fast_check_state_of_submit_button_approach():
             print("    AI apIpears to have finished responding.")
             running = False
             robo.robo_delay(delay=2)
+        robo.ai_check_for_too_many_requests()
 
 def save_image(**kwargs):
     #position_click = kwargs.get("position_click", [960, 500])
