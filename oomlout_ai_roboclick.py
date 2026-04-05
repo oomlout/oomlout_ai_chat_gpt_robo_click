@@ -384,7 +384,7 @@ def ai_add_image(**kwargs):
     return_value = ""
     print("add_image -- adding an image")
     #kwargs["position_click"] = [750,995]
-
+    robo.ai_check_for_too_many_requests()
     action = kwargs.get("action", {})
     file_name = action.get("file_source", "")
     if file_name == "":
@@ -413,13 +413,16 @@ def ai_add_image(**kwargs):
     #send "  "
     robo.robo_keyboard_send(string="  ", delay=2)  # Send two spaces to open the add image dialog
     #tab once
-    robo.robo_keyboard_press_tab(delay=5, repeat=1)  # Press tab once to focus on the add image button
+    if True:
+        #robo.robo_keyboard_press_tab(delay=5, repeat=1)  # Press tab once to focus on the add image button
+        #now shift tab
+        robo.robo_keyboard_press_tab_shift(delay=5, repeat=1)  # Press shift+tab once to focus on the add image button
     #down zero times
     #robo.robo_keyboard_press_down(delay=1, repeat=1)  # Press down zero times to select the file input
     #enter once
     robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
     #new needs two enters maybe
-    if False:
+    if True:
         robo.robo_keyboard_press_enter(delay=5)  # Press enter to open the file dialog
     #robo.robo_keyboard_press_down(delay=1, repeat=2)  # Press down twice to select the file input
     robo.robo_keyboard_send(string=file_name_absolute, delay=5)  # Type the file name
@@ -448,6 +451,7 @@ def ai_continue_chat(**kwargs):
     #longer delay for long chats
     robo.robo_chrome_open_url(url=url_chat, delay=30, message="    opening a new chat")    
     #check for hitting limit
+    robo.ai_check_for_too_many_requests()
     if True:
         print("    Checking for message limit...")
         clip = robo.robo_keyboard_copy(delay=5, position=[300, 300])  # Copy some text to check for limit
@@ -692,7 +696,7 @@ def ai_save_text(**kwargs):
     
     clip = action.get("clip", "&&&tag for copy&&&")
     directory = kwargs.get("directory", "")
-
+    robo.ai_check_for_too_many_requests()
     robo.robo_mouse_click(position=[300, 300], delay=2, button="left")  # Click to focus
     text = robo.robo_keyboard_copy(delay=2)  # Copy the selected text
 
@@ -1969,6 +1973,7 @@ def save_image_generated_old_press_down_40_time_approach(**kwargs):
         robo.robo_delay(delay=300)
         delay = random.randint(100, 300)
         robo.robo_delay(delay=delay)  # Wait for the image to be generated
+        robo.ai_check_for_too_many_requests()
     elif "fast" in mode_ai_wait:
         ai_wait_mode_fast_check(mode_ai_wait="fast_clipboard_state")
     
@@ -2067,6 +2072,7 @@ def ai_wait_mode_fast_check_state_of_submit_button_approach():
 def save_image(**kwargs):
     #position_click = kwargs.get("position_click", [960, 500])
     #position_click = kwargs.get("position_click", [960, 360])
+    robo.ai_check_for_too_many_requests()
     position_click = kwargs.get("position_click", [960, 280])
     
     action = kwargs.get("action", {})
